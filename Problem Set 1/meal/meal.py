@@ -41,7 +41,7 @@ def convert(time):
     # translate minutes to decimal units
     m = m / 60
 
-    # small input protection
+    # small protection for 'strange' user input
     if is_am or is_pm and h < 13:
 
         # make 12 am midnight, or 0 hours
