@@ -17,7 +17,6 @@ def main():
     print(result)
 
 
-
 def do_math(op, a, b):
 
     a = float(a)
@@ -33,5 +32,6 @@ def do_math(op, a, b):
         return a * b
     else:
         raise Exception("Unknown operation")
-    
+
+
 main()
