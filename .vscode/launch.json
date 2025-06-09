@@ -2,6 +2,56 @@
     "version": "0.2.0",
     "configurations": [
         {
+            "name": "Run camel.py",
+            "type": "debugpy",
+            "request": "launch",
+            "program": "${workspaceFolder}/Problem Set 2/camel/camel.py",
+            "cwd": "${workspaceFolder}/Problem Set 2/camel/",
+            "console": "integratedTerminal",
+            "justMyCode": true,
+            "stopOnEntry": false
+        },
+        {
+            "name": "Run coke.py",
+            "type": "debugpy",
+            "request": "launch",
+            "program": "${workspaceFolder}/Problem Set 2/coke/coke.py",
+            "cwd": "${workspaceFolder}/Problem Set 2/coke/",
+            "console": "integratedTerminal",
+            "justMyCode": true,
+            "stopOnEntry": false
+        },
+                {
+            "name": "Run nutrition.py",
+            "type": "debugpy",
+            "request": "launch",
+            "program": "${workspaceFolder}/Problem Set 2/nutrition/nutrition.py",
+            "cwd": "${workspaceFolder}/Problem Set 2/nutrition/",
+            "console": "integratedTerminal",
+            "justMyCode": true,
+            "stopOnEntry": false
+        },
+                {
+            "name": "Run plates.py",
+            "type": "debugpy",
+            "request": "launch",
+            "program": "${workspaceFolder}/Problem Set 2/plates/plates.py",
+            "cwd": "${workspaceFolder}/Problem Set 2/plates/",
+            "console": "integratedTerminal",
+            "justMyCode": true,
+            "stopOnEntry": false
+        },
+                {
+            "name": "Run twttr.py",
+            "type": "debugpy",
+            "request": "launch",
+            "program": "${workspaceFolder}/Problem Set 2/twttr/twttr.py",
+            "cwd": "${workspaceFolder}/Problem Set 2/twttr/",
+            "console": "integratedTerminal",
+            "justMyCode": true,
+            "stopOnEntry": false
+        },
+        {
             "name": "Run indoor.py",
             "type": "debugpy",
             "request": "launch",
