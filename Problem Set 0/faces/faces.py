@@ -1,7 +1,7 @@
 # define main function
 def main():
     # get user input
-    message = input("Enter message here: ")
+    message = input("")
     
     # call convert and assign result to output
     output = convert(message)
