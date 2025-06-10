@@ -2,6 +2,46 @@
     "version": "0.2.0",
     "configurations": [
         {
+            "name": "Run taqueria.py",
+            "type": "debugpy",
+            "request": "launch",
+            "program": "${workspaceFolder}/Problem Set 3/taqueria/taqueria.py",
+            "cwd": "${workspaceFolder}/Problem Set 3/taqueria/",
+            "console": "integratedTerminal",
+            "justMyCode": true,
+            "stopOnEntry": false
+        },
+        {
+            "name": "Run outdated.py",
+            "type": "debugpy",
+            "request": "launch",
+            "program": "${workspaceFolder}/Problem Set 3/outdated/outdated.py",
+            "cwd": "${workspaceFolder}/Problem Set 3/outdated/",
+            "console": "integratedTerminal",
+            "justMyCode": true,
+            "stopOnEntry": false
+        },
+        {
+            "name": "Run grocery.py",
+            "type": "debugpy",
+            "request": "launch",
+            "program": "${workspaceFolder}/Problem Set 3/grocery/grocery.py",
+            "cwd": "${workspaceFolder}/Problem Set 3/grocery/",
+            "console": "integratedTerminal",
+            "justMyCode": true,
+            "stopOnEntry": false
+        },
+        {
+            "name": "Run fuel.py",
+            "type": "debugpy",
+            "request": "launch",
+            "program": "${workspaceFolder}/Problem Set 3/fuel/fuel.py",
+            "cwd": "${workspaceFolder}/Problem Set 3/fuel/",
+            "console": "integratedTerminal",
+            "justMyCode": true,
+            "stopOnEntry": false
+        },
+        {
             "name": "Run camel.py",
             "type": "debugpy",
             "request": "launch",
