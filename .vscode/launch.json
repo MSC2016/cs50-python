@@ -2,11 +2,22 @@
     "version": "0.2.0",
     "configurations": [
         {
+            "name": "Run figlet.py",
+            "type": "debugpy",
+            "request": "launch",
+            "program": "${workspaceFolder}/Problem Set 4/figlet/figlet.py",
+            "cwd": "${workspaceFolder}/Problem Set 4/figlet/",
+            "console": "integratedTerminal",
+            "args": ["aaa"],
+            "justMyCode": true,
+            "stopOnEntry": false
+        },
+        {
             "name": "Run emojize.py",
             "type": "debugpy",
             "request": "launch",
             "program": "${workspaceFolder}/Problem Set 4/emojize/emojize.py",
-            "cwd": "${workspaceFolder}/Problem Set 3/emojize/",
+            "cwd": "${workspaceFolder}/Problem Set 4/emojize/",
             "console": "integratedTerminal",
             "justMyCode": true,
             "stopOnEntry": false
