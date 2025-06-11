@@ -8,7 +8,7 @@
             "program": "${workspaceFolder}/Problem Set 4/figlet/figlet.py",
             "cwd": "${workspaceFolder}/Problem Set 4/figlet/",
             "console": "integratedTerminal",
-            "args": ["aaa"],
+            "args": ["-f slant"],
             "justMyCode": true,
             "stopOnEntry": false
         },
