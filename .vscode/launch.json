@@ -3,6 +3,16 @@
     
     "configurations": [
         {
+            "name": "Run game.py",
+            "type": "debugpy",
+            "request": "launch",
+            "program": "${workspaceFolder}/Problem Set 4/game/game.py",
+            "cwd": "${workspaceFolder}/Problem Set 4/game/",
+            "console": "integratedTerminal",
+            "justMyCode": true,
+            "stopOnEntry": false
+        },
+        {
             "name": "Run adieu.py",
             "type": "debugpy",
             "request": "launch",
