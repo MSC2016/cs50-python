@@ -6,8 +6,7 @@ def main():
     level = get_user_input('Level: ')
     # get a random number between 0 and level
     number = random.randint(0, level)
-    # set the initial value of the guess to -1, to ensure the 
-    # while loop is executed
+    # set the initial value of the guess to -1, 
     guess = -1
     # loop until the user guesses the number
     while guess != number:
@@ -26,7 +25,8 @@ def main():
 def get_user_input(s='') -> int:
     '''
     Get an input from a user, 
-    if a value for s is given, it should be the prompt
+    if a value for s is given, 
+    it should be the prompt.
     '''
     # loop forever
     while True:
