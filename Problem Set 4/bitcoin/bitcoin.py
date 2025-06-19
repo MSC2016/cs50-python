@@ -1,12 +1,15 @@
 import sys
 import requests
-
+import os
 
 def main():
+    # get the api_key from env, instead of hardcoding and accidentally commiting to github
+    # this just happened, ensuring it doesnt happen again
+    api_key = os.getenv('API_KEY')
     # get an input from the user
     qty = get_arguments()
     # created a few variables with the data needed
-    api_key = ''
+
     coin_id = 'bitcoin'
     url = f'https://rest.coincap.io/v3/assets/{coin_id}'
     headers = {'Authorization': f'Bearer {api_key}'}
