@@ -6,7 +6,7 @@ def main():
     # get an input from the user
     qty = get_arguments()
     # created a few variables with the data needed
-    api_key = 'd7b217a8f0a8dc80db9a3cb6ec05849fa7bfc4450cab474458956d2b5799a29e'
+    api_key = ''
     coin_id = 'bitcoin'
     url = f'https://rest.coincap.io/v3/assets/{coin_id}'
     headers = {'Authorization': f'Bearer {api_key}'}
