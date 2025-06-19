@@ -77,7 +77,7 @@ def generate_integer(level) -> int:
     # if level 1 returns random integer between 0 and 9
     if level == 1:
         return random.randint(0, 9)
-    # otherwise return number between 10 to the power of (level -1)  
+    # otherwise return number between 10 to the power of (level -1)
     # and 10 to the power of level -1 
     else:
         return random.randint(10**(level - 1), 10**level - 1)

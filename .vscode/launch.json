@@ -3,6 +3,17 @@
     
     "configurations": [
         {
+            "name": "Run bitcoin.py",
+            "type": "debugpy",
+            "request": "launch",
+            "program": "${workspaceFolder}/Problem Set 4/bitcoin/bitcoin.py",
+            "cwd": "${workspaceFolder}/Problem Set 4/bitcoin/",
+            "args": ["2"],
+            "console": "integratedTerminal",
+            "justMyCode": true,
+            "stopOnEntry": false
+        },
+        {
             "name": "Run professor.py",
             "type": "debugpy",
             "request": "launch",
