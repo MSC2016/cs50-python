@@ -3,6 +3,36 @@
     
     "configurations": [
         {
+            "name": "Run Test plates.py",
+            "type": "debugpy",
+            "request": "launch",
+            "program": "${workspaceFolder}/Problem Set 5/test_plates/plates.py",
+            "cwd": "${workspaceFolder}/Problem Set 5/test_plates/",
+            "console": "integratedTerminal",
+            "justMyCode": true,
+            "stopOnEntry": false
+        },
+        {
+            "name": "Run Test bank.py",
+            "type": "debugpy",
+            "request": "launch",
+            "program": "${workspaceFolder}/Problem Set 5/test_bank/bank.py",
+            "cwd": "${workspaceFolder}/Problem Set 5/test_bank/",
+            "console": "integratedTerminal",
+            "justMyCode": true,
+            "stopOnEntry": false
+        },
+        {
+            "name": "Run Test my Twttr.py",
+            "type": "debugpy",
+            "request": "launch",
+            "program": "${workspaceFolder}/Problem Set 5/test_twttr/twttr.py",
+            "cwd": "${workspaceFolder}/Problem Set 5/test_twttr/",
+            "console": "integratedTerminal",
+            "justMyCode": true,
+            "stopOnEntry": false
+        },
+        {
             "name": "Run bitcoin.py",
             "type": "debugpy",
             "request": "launch",
