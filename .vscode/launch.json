@@ -3,6 +3,36 @@
     
     "configurations": [
         {
+            "name": "Run shorts - views.py",
+            "type": "debugpy",
+            "request": "launch",
+            "program": "${workspaceFolder}/Problem Set 6/shorts/views.py",
+            "cwd": "${workspaceFolder}/Problem Set 6/shorts/",
+            "console": "integratedTerminal",
+            "justMyCode": true,
+            "stopOnEntry": false
+        },
+        {
+            "name": "Run shorts - image.py",
+            "type": "debugpy",
+            "request": "launch",
+            "program": "${workspaceFolder}/Problem Set 6/shorts/image.py",
+            "cwd": "${workspaceFolder}/Problem Set 6/shorts/",
+            "console": "integratedTerminal",
+            "justMyCode": true,
+            "stopOnEntry": false
+        },
+        {
+            "name": "Run Test fuel.py",
+            "type": "debugpy",
+            "request": "launch",
+            "program": "${workspaceFolder}/Problem Set 5/test_fuel/fuel.py",
+            "cwd": "${workspaceFolder}/Problem Set 5/test_fuel/",
+            "console": "integratedTerminal",
+            "justMyCode": true,
+            "stopOnEntry": false
+        },
+        {
             "name": "Run Test plates.py",
             "type": "debugpy",
             "request": "launch",
