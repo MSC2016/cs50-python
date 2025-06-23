@@ -3,6 +3,54 @@
     
     "configurations": [
         {
+            "name": "Run shirt.py",
+            "type": "debugpy",
+            "request": "launch",
+            "program": "${workspaceFolder}/Problem Set 6/shirt/shirt.py",
+            "cwd": "${workspaceFolder}/Problem Set 6/shirt/",
+            "console": "integratedTerminal",
+            //"args": ["before1.png"],
+            //"args": ["before1.png", "after1.png", "after2.png"],
+            "args": ["before1.jpg", "after1.jpg"],
+            "justMyCode": true,
+            "stopOnEntry": false
+        },
+        {
+            "name": "Run scourgify.py",
+            "type": "debugpy",
+            "request": "launch",
+            "program": "${workspaceFolder}/Problem Set 6/scourgify/scourgify.py",
+            "cwd": "${workspaceFolder}/Problem Set 6/scourgify/",
+            "console": "integratedTerminal",
+            "args": ["before.csv", "after.csv"],
+            //"args": ["before.csv", "after.csv", "test_too_many"],
+            //"args": ["test_too_few_args"],
+            "justMyCode": true,
+            "stopOnEntry": false
+        },
+        {
+            "name": "Run pizza.py",
+            "type": "debugpy",
+            "request": "launch",
+            "program": "${workspaceFolder}/Problem Set 6/pizza/pizza.py",
+            "cwd": "${workspaceFolder}/Problem Set 6/pizza/",
+            "console": "integratedTerminal",
+            "args": ["sicilian.csv"],
+            "justMyCode": true,
+            "stopOnEntry": false
+        },
+        {
+            "name": "Run lines.py",
+            "type": "debugpy",
+            "request": "launch",
+            "program": "${workspaceFolder}/Problem Set 6/lines/lines.py",
+            "cwd": "${workspaceFolder}/Problem Set 6/lines/",
+            "console": "integratedTerminal",
+            "args": ["lines.py"],
+            "justMyCode": true,
+            "stopOnEntry": false
+        },
+        {
             "name": "Run shorts - test_lambdas.py",
             "type": "debugpy",
             "request": "launch",

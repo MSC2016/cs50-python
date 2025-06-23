@@ -50,5 +50,5 @@ def calculate_brightness(filename):
         brightness = np.mean(np.array(image.convert('L')))
     return brightness
 
-if __name__ == "__main__":
+if __name__ == '__main__':
     main()
