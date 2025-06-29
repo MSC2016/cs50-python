@@ -1,11 +1,13 @@
+import json
 import sys
 import requests
-import os
 
 def main():
-    # get the api_key from env, instead of hardcoding and accidentally commiting to github
-    # this just happened, ensuring it doesnt happen again
-    api_key = os.getenv('API_KEY')
+    # get the api_key from secrets.json file, instead of hardcoding and accidentally commiting to github
+    # load secrets from the current folder, add **/secrets.json to .gitignore 
+    secrets = load_secrets()
+    api_key = secrets.get('API_KEY')
+
     # get an input from the user
     qty = get_arguments()
     # created a few variables with the data needed
@@ -25,6 +27,20 @@ def main():
     except Exception as e:
         print(e)
 
+def load_secrets():
+    '''
+    Load secrets from secrets.json file in the current directory.
+    Exits the program if the file doesn't exist or is improperly formatted.
+    '''
+    try:
+        with open('secrets.json') as f:
+            return json.load(f)
+    except FileNotFoundError:
+        print("Missing secrets.json file")
+        sys.exit(1)
+    except json.JSONDecodeError:
+        print("Malformed secrets.json file")
+        sys.exit(1)
 
 def get_arguments():
     '''
