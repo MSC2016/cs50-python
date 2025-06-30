@@ -3,6 +3,16 @@
     
     "configurations": [
         {
+            "name": "Run numb3rs.py",
+            "type": "debugpy",
+            "request": "launch",
+            "program": "${workspaceFolder}/Problem Set 7/numb3rs/numb3rs.py",
+            "cwd": "${workspaceFolder}/Problem Set 7/numb3rs/",
+            "console": "integratedTerminal",
+            "justMyCode": true,
+            "stopOnEntry": false
+        },
+        {
             "name": "Run shirt.py",
             "type": "debugpy",
             "request": "launch",

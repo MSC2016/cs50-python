@@ -1,6 +1,9 @@
 # Secrets.json file
 **/secrets.json
 
+# ignore .envrc - virtual environment
+.envrc
+
 # Byte-compiled / optimized / DLL files
 __pycache__/
 *.py[cod]
