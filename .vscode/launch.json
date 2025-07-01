@@ -3,6 +3,46 @@
     
     "configurations": [
         {
+            "name": "Run response.py",
+            "type": "debugpy",
+            "request": "launch",
+            "program": "${workspaceFolder}/Problem Set 7/response/response.py",
+            "cwd": "${workspaceFolder}/Problem Set 7/response/",
+            "console": "integratedTerminal",
+            "justMyCode": true,
+            "stopOnEntry": false
+        },
+        {
+            "name": "Run um.py",
+            "type": "debugpy",
+            "request": "launch",
+            "program": "${workspaceFolder}/Problem Set 7/um/um.py",
+            "cwd": "${workspaceFolder}/Problem Set 7/um/",
+            "console": "integratedTerminal",
+            "justMyCode": true,
+            "stopOnEntry": false
+        },
+        {
+            "name": "Run working.py",
+            "type": "debugpy",
+            "request": "launch",
+            "program": "${workspaceFolder}/Problem Set 7/working/working.py",
+            "cwd": "${workspaceFolder}/Problem Set 7/working/",
+            "console": "integratedTerminal",
+            "justMyCode": true,
+            "stopOnEntry": false
+        },
+        {
+            "name": "Run watch.py",
+            "type": "debugpy",
+            "request": "launch",
+            "program": "${workspaceFolder}/Problem Set 7/watch/watch.py",
+            "cwd": "${workspaceFolder}/Problem Set 7/watch/",
+            "console": "integratedTerminal",
+            "justMyCode": true,
+            "stopOnEntry": false
+        },
+        {
             "name": "Run numb3rs.py",
             "type": "debugpy",
             "request": "launch",
