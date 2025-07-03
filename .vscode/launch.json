@@ -3,6 +3,26 @@
     
     "configurations": [
         {
+            "name": "Run shirtificate.py",
+            "type": "debugpy",
+            "request": "launch",
+            "program": "${workspaceFolder}/Problem Set 8/shirtificate/shirtificate.py",
+            "cwd": "${workspaceFolder}/Problem Set 8/shirtificate/",
+            "console": "integratedTerminal",
+            "justMyCode": true,
+            "stopOnEntry": false
+        },
+        {
+            "name": "Run seasons.py",
+            "type": "debugpy",
+            "request": "launch",
+            "program": "${workspaceFolder}/Problem Set 8/seasons/seasons.py",
+            "cwd": "${workspaceFolder}/Problem Set 8/seasons/",
+            "console": "integratedTerminal",
+            "justMyCode": true,
+            "stopOnEntry": false
+        },
+        {
             "name": "Run response.py",
             "type": "debugpy",
             "request": "launch",
