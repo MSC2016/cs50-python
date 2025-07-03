@@ -1,7 +1,7 @@
 from fpdf import FPDF
 
 class Shirtificate(FPDF):
-    def __init__(self, text = 'Hello, world!!!'):
+    def __init__(self, text = ''):
         super().__init__()
         self.add_page(orientation="portrait", format="A4")
         self.set_margin(0)
