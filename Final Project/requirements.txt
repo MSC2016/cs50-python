@@ -1,0 +1,6 @@
+pytest
+argparse
+filelock
+cryptography
+keyring
+pwinput
