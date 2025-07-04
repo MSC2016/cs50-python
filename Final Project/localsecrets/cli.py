@@ -1,4 +1,5 @@
 import argparse
+import sys
 from localsecrets import utils
 from localsecrets.vault import create_vault_file, load_vault_file
 
@@ -20,7 +21,7 @@ def main():
     group.add_argument('--load', action='store_true', help="Load an existing secrets vault")
     group.add_argument('--info', action='store_true', help="Show info about a vault file (to be implemented)")
 
-    parser.add_argument('file', help="Vault file path")
+    parser.add_argument('file_path', help="Vault file path")
 
     args = parser.parse_args()
 
@@ -37,11 +38,9 @@ def main():
                 ...
         else:
             # handle password doesnt match
-            print("[ERROR] Passwords do not match!")
+            sys.exit("[ERROR] Passwords do not match!")
             
             
-        
-
     elif args.load:
         password = utils.cli_get_password()
         vault = load_vault_file(args.file, password)

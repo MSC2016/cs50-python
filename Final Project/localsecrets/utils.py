@@ -1,5 +1,5 @@
 import sys
-from ..dependencies.pwinput import pwinput
+from dependencies.pwinput import pwinput
 
 def cli_get_password(message = "Enter password: ", mask="*"):
     try:
