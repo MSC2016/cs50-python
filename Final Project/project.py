@@ -1,5 +1,5 @@
 from localsecrets import vault
-from pwinput import pwinput
+from dependencies.pwinput import pwinput
 
 def main():
     pw = pwinput()

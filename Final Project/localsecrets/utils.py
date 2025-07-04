@@ -1,19 +1,18 @@
 import sys
-from pwinput import pwinput
+from ..dependencies.pwinput import pwinput
 
-def cli_get_password():
+def cli_get_password(message = "Enter password: ", mask="*"):
     try:
-        return pwinput.pwinput("Enter your vault password: ", mask="*")
+        return pwinput.pwinput(message, mask)
     except KeyboardInterrupt:
         sys.exit('\n\nUser Abort -- Keyboard Interrupt\n')
 
 
-def cli_create_password(message = "Create a master password: ", mask = '*'):
+def cli_create_password(message1 = "Create password: ", message2 = "Confirm password: ", mask = '*'):
     try:
-        password = pwinput("Create a master password: ", mask)
-        password_confirm = pwinput("Confirm master password: ", mask)
+        password = pwinput(message1, mask)
+        password_confirm = pwinput(message2, mask)
         if password != password_confirm:
-            print("❌ Passwords do not match!")
             return False
         else:
             return password 

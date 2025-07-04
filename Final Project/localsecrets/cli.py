@@ -6,7 +6,7 @@ def main():
     parser = argparse.ArgumentParser(
         prog="localsecrets",
         description=(
-            "🔐 LocalSecrets - A simple local encrypted key vault\n\n"
+            "LocalSecrets - A simple local encrypted key vault\n\n"
             "Examples:\n"
             "  python3 -m localsecrets.cli --create myvault.db\n"
             "  python3 -m localsecrets.cli --load myvault.db\n"
@@ -26,20 +26,33 @@ def main():
 
     if args.create:
         password = utils.cli_create_password()
-        create_vault_file(args.file, password)
-        print(f"✅ Vault created at {args.file}.")
+        if password:
+            if len(password) > 0:
+                create_vault_file(args.file, password)
+                print(f"Vault created at {args.file}.")
+            else:
+                # handle empty password
+                # are you sure you want to do this?
+                raise NotImplementedError
+                ...
+        else:
+            # handle password doesnt match
+            print("[ERROR] Passwords do not match!")
+            
+            
+        
 
     elif args.load:
         password = utils.cli_get_password()
         vault = load_vault_file(args.file, password)
         if vault:
-            print(f"✅ Vault loaded from {args.file}.")
+            print(f"[OK] Vault loaded from {args.file}.")
         else:
-            print("❌ Failed to load vault. Wrong password or corrupted file.")
+            print("[ERROR] Failed to load vault. Wrong password or corrupted file.")
 
     elif args.info:
         # Placeholder for future implementation
-        print(f"ℹ️  Info requested for {args.file} (feature not implemented yet).")
+        print(f"Info requested for {args.file} (feature not implemented yet).")
 
 if __name__ == "__main__":
     main()
