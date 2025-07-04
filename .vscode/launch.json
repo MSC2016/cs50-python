@@ -3,6 +3,16 @@
     
     "configurations": [
         {
+            "name": "Run Final Project.py",
+            "type": "debugpy",
+            "request": "launch",
+            "program": "${workspaceFolder}/Final Project/project.py",
+            "cwd": "${workspaceFolder}/Final Project/",
+            "console": "integratedTerminal",
+            "justMyCode": true,
+            "stopOnEntry": false
+        },
+        {
             "name": "Run shirtificate.py",
             "type": "debugpy",
             "request": "launch",

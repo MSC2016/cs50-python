@@ -3,4 +3,3 @@ argparse
 filelock
 cryptography
 keyring
-pwinput
