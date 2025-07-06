@@ -1,14 +1,14 @@
 import sys
 from dependencies.pwinput import pwinput
 
-def cli_get_password(message = "Enter password: ", mask="*"):
+def get_password(message = "Enter password: ", mask="*"):
     try:
         return pwinput.pwinput(message, mask)
     except KeyboardInterrupt:
         sys.exit('\n\nUser Abort -- Keyboard Interrupt\n')
 
 
-def cli_create_password(message1 = "Create password: ", message2 = "Confirm password: ", mask = '*'):
+def create_password(message1 = "Create password: ", message2 = "Confirm password: ", mask = '*'):
     try:
         password = pwinput(message1, mask)
         password_confirm = pwinput(message2, mask)
