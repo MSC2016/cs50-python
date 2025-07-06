@@ -1,0 +1,149 @@
+fileio.py
+
+Implements the FileIO class for managing interactions with the secrets database file.
+Responsible for file-level operations only (e.g., existence check, read/write, locking, and validation).
+Implements filelock when reading/writing to files
+This class does not handle passwords, encryption, or authentication logic.
+
+Class: FileIO
+Public Methods:
+
+create_new_secret_db_file(file_path: str) -> bool
+    Checks if the file already exists. If it does, returns False.
+    Creates a new file containing an empty default_vault_data_object.
+    Reads the file back and compares its contents to the original in-memory object.
+    Returns True if the file was created and validated, otherwise False.
+
+read_secrets_db_file(file_path: str) -> dict | bool
+    Check if the file exists and is readable.
+    Check if file is locked 
+    Returns the loaded data if successful, file exists and is not locked.
+    Returns False if the file is missing, locked, or unreadable.
+
+save_secret_db_file(data: dict, file_path: str) -> bool
+    Verifies that the file exists, is unlocked and is writable.
+    Locks the file using filelock.
+    Overwrites the file with new data.
+    Reads the file back and compares with original data.
+    Unlocks the file.
+    Returns True if saved and validated, otherwise False.
+
+check_file_is_locked(file_path: str) -> bool
+    Returns True if the file exists and is locked.
+    Returns False otherwise.
+
+check_if_file_exists(file_path: str) -> bool
+    Returns True if the file exists.
+    Returns False if it does not.
+
+--------------------
+
+crypto.py
+Class: crypto
+Public Methods:
+
+encrypt_data(data, encryption_key)
+    Encrypts data
+    checks encryption, uses the same key the data was encrypted with to decrypt, and compares both
+    Returns encrypted data if decrypted data and input data are equal
+    Returns false otherwise
+
+decrypt_data(data, encryption_key)
+    Decrypts received data with received key
+    Returns False if something failed
+
+--------------------
+
+vault.py
+
+Implements the Vault class for managing a single logical vault.
+Each Vault stores key-value secrets in memory and provides basic access methods.
+Does not perform encryption or persistence (handled externally).
+Should only be interacted with directly when managing a specific vault instance.
+
+Class: Vault
+Public Methods:
+
+get_key(key_name: str) -> str | None
+    Returns the value associated with the given key.
+    Returns None if the key does not exist.
+
+set_key(key_name: str, value: str) -> None
+    Stores the value under the given key name.
+    Returns False key already exists.
+
+delete_key(key_name: str, force: bool) -> bool
+    Delete the key if force is True or the key you are trying to delete exist in any other vault
+    Print or log message
+    Returns True if deletion was successful, otherwise False.
+
+list_keys() -> list[str]
+    Returns a list of all stored key names in the vault.
+
+list_unique_keys() -> list[str]
+    Returns a list of keys that exis only in this vault and not in any of the others
+
+change_key(key_name: str, value: str)
+    If key already exists, change its value and return True
+    Return False otherwise
+
+move_key(key_name: str, vault_name: str)
+    Returns false if the key exists in destination vault
+    If it doesnt move the key to the destination vault and return True
+
+clear(force: bool) -> None
+    If force is True delete all keys from the vault.
+    Delete all keys if force is false and all the keys in the vault, exist in other vaults.
+    Return false if force is false, and any of the keys in the vault is unique to the vault being cleared
+
+find_keys_by_value(value: str) list-> str
+    returns a list of key names that contains value in this vault
+
+--------------------
+
+vaults.py
+
+Implements the Vaults class for managing multiple Vault instances.
+Acts as the top-level container for all vaults, enabling selection, access, and organization.
+Handles default vault logic for simplified access when only one vault is in use.
+Does not handle encryption or persistence; stores Vault instances in memory.
+
+Class: Vaults
+Public Methods:
+
+create_vault(vault_name: str) -> bool
+    Creates a new vault with the specified name.
+    Returns False if a vault with the same name already exists.
+    Sets the first created vault as the default vault.
+
+delete_vault(vault_name: str, force: bool) -> bool
+    if force is True deletes the specified vault from the collection.
+    Returns False if the vault does not exist.
+    Return False if any of the keys in the vault does not exist in any other vault
+    If the deleted vault was the default, resets default vault to None.
+
+set_default(vault_name: str) -> bool
+    Sets the specified vault as the default.
+    Returns False if the vault does not exist.
+
+get_default() -> Vault | None
+    Returns the current default Vault instance.
+    Returns None if no default is set.
+
+get_vault(vault_name: str) -> Vault | None
+    Returns the Vault instance with the given name.
+    Returns None if the vault does not exist.
+
+list_vaults() -> list[str]
+    Returns a list of all vaults
+
+find_keys_by_value(value: str) list-> dict
+    returns a list of vault and key names that contain the associated value
+
+__getitem__(vault_name: str) -> Vault
+    Enables dictionary-like access to vaults via vaults["vault_name"].
+
+## TODO ##
+    consider moving deleted keys to a 'recycle_bin' vault instead, and keep it in the file until the user decides to delete its contents partialy, or completly
+    instead of the force flag in the delete methods, make it 'permanent' and when permanent delete, otherwise move to recycle_bin Vault
+    maybe add a flag to secrets.db file on its creation, use recycle_bin vault whenm deleting, and use that flag to select the default behaviour when deleting keys.
