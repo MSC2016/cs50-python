@@ -1,10 +1,10 @@
-from localsecrets import vault
+from localsecrets import vaults
 from dependencies.pwinput import pwinput
 
 def main():
     pw = pwinput()
     print(pw)
-    print(vault.test_vault())
+    print(vaults.test_vault())
 
 
 def function_1():
