@@ -54,96 +54,184 @@ decrypt_data(data, encryption_key)
 
 --------------------
 
+key.py
+
+Implements the Key class for managing a single secret.
+Each key consists of a name and a dictionary with mandatory secret key for the api_key and optional user-defined metadata fields.
+
+Class: Key
+Public Methods:
+
+get_secret() -> str
+	Returns the value stored under the mandatory secret field.
+	Returns None if not set.
+
+set_secret(value: str, force= False) -> Bool
+	Sets or updates the value of the secret field.
+	Return False If secret already contains a value and force is False.
+	Return True and update the value if force is True
+
+get_data(field_name: str) -> Any
+	Returns the value of the requested metadata field.
+	Returns None if the field does not exist.
+
+set_data(field_name: str, value: Any) -> None
+	Stores or updates the specified metadata field.
+	Overwrites existing values if the field is already present.
+
+delete_data(field_name: str | list of field names to delete) -> bool
+	Removes the specified metadata field or fields.
+	Returns True if successfully deleted.
+	Returns False if the field does not exist or if the user is trying to delete the secret.
+
+list_data_fields() -> list[str]
+	Returns a list of metadata field names (excluding secret by default).
+
+to_dict() -> dict
+	Serializes the Key instance to a dictionary, including secret and all metadata.
+
+from_dict(data: dict) -> Key
+	Creates a Key instance from a dictionary.
+	Requires the dictionary to contain a secret field.
+	Returns None if format is not valid
+	
+validate(data: dict) -> Bool
+	Returns True if data can be converted to key object, False otherwise
+
+save_to(vault_name: str) -> Bool
+	Saves the key instance to the specified vault
+	Returns true if saved, or false if the a key with the same name already exists in the vault
+	
+--------------------
+
 vault.py
 
 Implements the Vault class for managing a single logical vault.
-Each Vault stores key-value secrets in memory and provides basic access methods.
-Does not perform encryption or persistence (handled externally).
-Should only be interacted with directly when managing a specific vault instance.
+Each Vault contains multiple named key instances or secrets
+Supports safe deletions -- move to recycle vault instead of deleting
 
 Class: Vault
 Public Methods:
 
-get_key(key_name: str) -> str | None
-    Returns the value associated with the given key.
-    Returns None if the key does not exist.
+get_secret(key_name: str) -> str | None
+ 	Returns the secret value of the specified key.
+ 	Returns None if the key does not exist or has no secret.
 
-set_key(key_name: str, value: str) -> None
-    Stores the value under the given key name.
-    Returns False key already exists.
+create_key(key_name: str, secret: str | key object) -> bool
+ 	Creates a new key with the specified name and secret, or specified data if its passed a key object.
+ 	Returns False if the key already exists.
+	 Returns True if the key was successfully created.
 
-delete_key(key_name: str, force: bool) -> bool
-    Delete the key if force is True or the key you are trying to delete exist in any other vault
-    Print or log message
-    Returns True if deletion was successful, otherwise False.
+delete_key(key_name: str, permanent: bool = False) -> bool
+ 	Deletes the specified key.
+ 	If permanent is False, the key should be moved to a recycle_bin vault (handled externally).
+ 	Return False if the key does not exist.
+ 	Return True if deleted or moved to recycle vault.
+	Return True if recycle vault is not in use.
+
+change_secret(key_name: str, new_secret: str) -> bool
+ 	Updates the secret of an existing key.
+ 	Returns True if updated.
+ 	Returns False if the key does not exist.
+
+get_data(key_name: str, field_name: str) -> Any
+ 	Returns a metadata field value for the specified key.
+ 	Returns None if the key or field does not exist.
+
+set_data(key_name: str | key object, field_name: str, value: Any | data_object) -> bool
+ 	Sets or updates a metadata field for the specified key.
+ 	Returns False if the key does not exist.
+ 	Returns True on success.
+
+delete_data(key_name: str, field_name: str | fiels_names) -> bool
+	Deletes a metadata field from the specified key.
+	Returns False if the key or field does not exist or if field is protected (secret).
+	Returns True if the field was removed.
 
 list_keys() -> list[str]
-    Returns a list of all stored key names in the vault.
+	Returns a list of all key names in the vault.
 
 list_unique_keys() -> list[str]
-    Returns a list of keys that exis only in this vault and not in any of the others
+	Returns a list of key names that are unique to this vault and not present in any of the other vaults
 
-change_key(key_name: str, value: str)
-    If key already exists, change its value and return True
-    Return False otherwise
+move_key(key_name: str, destination_vault: Vault) -> bool
+	Moves the specified key to another vault.
+	Returns False if the destination already has a key with the same name.
+	Returns True if successfully moved.
 
-move_key(key_name: str, vault_name: str)
-    Returns false if the key exists in destination vault
-    If it doesnt move the key to the destination vault and return True
+clear(permanent: bool = False) -> bool
+	Deletes all keys from the vault.
+	If permanent is False, and use recycle vault flag is true, move all key to recycle vault.
+	If permanent is True, delete all keys.
+	Returns True if the vault was cleared successfully.
+	Returns False if any key could not be deleted under the current settings.
 
-clear(force: bool) -> None
-    If force is True delete all keys from the vault.
-    Delete all keys if force is false and all the keys in the vault, exist in other vaults.
-    Return false if force is false, and any of the keys in the vault is unique to the vault being cleared
+find_keys_by_secret(value: str) -> list[str]
+	Returns a list of key names where the secret is equal the specified value.
 
-find_keys_by_value(value: str) list-> str
-    returns a list of key names that contains value in this vault
+find_keys_by_data(value: str) -> list[str]
+	Returns a list of key names where any data field name is equal the specified value.
 
---------------------
-
+search(Value: str) -> list[key]
+	Returns a list of keys that contain any string equal or partialy equal to value.
+	For this maybe each key should have a data, pointing to the vault where the key is stored.
+	
 vaults.py
 
 Implements the Vaults class for managing multiple Vault instances.
-Acts as the top-level container for all vaults, enabling selection, access, and organization.
-Handles default vault logic for simplified access when only one vault is in use.
-Does not handle encryption or persistence; stores Vault instances in memory.
+Acts as the top-level container for all vaults, enabling creation, deletion, selection, and organization.
+Supports default vault logic for simplified usage when only one vault is actively used.
+Delegates secret-level access and metadata handling to individual Vault instances.
+Includes recycle_bin vault to store deleted keys, when enabled and permanent flag is set to False
 
 Class: Vaults
 Public Methods:
 
 create_vault(vault_name: str) -> bool
-    Creates a new vault with the specified name.
-    Returns False if a vault with the same name already exists.
-    Sets the first created vault as the default vault.
+	Creates a new vault with the specified name.
+	Returns False if a vault with the same name already exists.
+	When instantiated creates a 'default' vault and sets 'default_vault' value to 'default' vault name.
+	
 
-delete_vault(vault_name: str, force: bool) -> bool
-    if force is True deletes the specified vault from the collection.
-    Returns False if the vault does not exist.
-    Return False if any of the keys in the vault does not exist in any other vault
-    If the deleted vault was the default, resets default vault to None.
-
+delete_vault(vault_name: str, permanent: bool = False) -> bool
+	Deletes the specified vault.
+	Returns False if the vault does not exist.
+	If permanent is False, keys from the deleted vault are moved to the recycle_bin vault.
+	If recycle_bin is disabled, deletion is prevented unless forced permanent.
+	The default vault can not be deleted.
+	Data in recycle vault should be in a different structure and should contain, deletion index, deletion date/time and key data
+	
 set_default(vault_name: str) -> bool
-    Sets the specified vault as the default.
-    Returns False if the vault does not exist.
+	Sets the specified vault as the default vault.
+	Returns False if the vault does not exist.
 
 get_default() -> Vault | None
-    Returns the current default Vault instance.
-    Returns None if no default is set.
+	Returns the current default vault instance.
+	Returns None if no default is set.
 
-get_vault(vault_name: str) -> Vault | None
-    Returns the Vault instance with the given name.
-    Returns None if the vault does not exist.
+get_vault_data(vault_name: str) -> Vault | None
+	Returns the Vault instance with the given name.
+	Returns None if the vault does not exist.
+	Returns the default vault if no vault_name is provided
 
 list_vaults() -> list[str]
-    Returns a list of all vaults
+	Returns a list of all vault names managed by this instance.
 
-find_keys_by_value(value: str) list-> dict
-    returns a list of vault and key names that contain the associated value
+find_keys_by_value(value: str) -> list[key]
+	Searches all vaults for any keys the specified value in secret.
+	Returns a list key objects
 
 __getitem__(vault_name: str) -> Vault
-    Enables dictionary-like access to vaults via vaults["vault_name"].
+ Enables dictionary-like access to vaults via vaults["vault_name"].
+ Raises KeyError if the vault does not exist.
+
+Behavior
+If a recycle_bin vault is enabled (by default), all key deletions move the key to the recycle_bin instead of permanently deleting it.
+The default deletion behavior is soft delete unless permanent=True is specified, or the vault is created with the flag use_recycle_vault = false.
+A configuration flag must be set at secrets.be creation time to enforce immediate deletion and skip recycle bin logic.
 
 ## TODO ##
-    consider moving deleted keys to a 'recycle_bin' vault instead, and keep it in the file until the user decides to delete its contents partialy, or completly
-    instead of the force flag in the delete methods, make it 'permanent' and when permanent delete, otherwise move to recycle_bin Vault
-    maybe add a flag to secrets.db file on its creation, use recycle_bin vault whenm deleting, and use that flag to select the default behaviour when deleting keys.
+vault.py
+search(Value: str) -> list[key]
+	Returns a list of keys value is a substring of key name, or any of the field names or values including secret.
+	For this maybe each key should have a data point, pointing to the vault where the key is stored.
