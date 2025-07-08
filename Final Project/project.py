@@ -1,10 +1,11 @@
 from localsecrets import vaults
 from dependencies.pwinput import pwinput
+from localsecrets.fileio import FileIO
 
 def main():
-    pw = pwinput()
-    print(pw)
-    print(vaults.test_vault())
+    f = FileIO('/mnt/d/secrets.db')
+    f.create_db_file()
+    print(f.read_db_file())
 
 
 def function_1():
