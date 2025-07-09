@@ -1,5 +1,5 @@
 def test_vault():
-    return "Vault is working!"
+    ...
 
 def create_vault_file():
     ...

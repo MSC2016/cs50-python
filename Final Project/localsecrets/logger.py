@@ -29,7 +29,6 @@ def log(message: str, level: str = 'info'):
     class_name = local_vars['self'].__class__.__name__ if 'self' in local_vars else None
     # print(class_name)
     location = f'{class_name}.{func_name}()' if class_name else f'{func_name}()'
-
     # Timestamp
     timestamp = datetime.now().isoformat().split('.')[0].replace('T', ' ')
 

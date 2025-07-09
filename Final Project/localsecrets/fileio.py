@@ -1,7 +1,5 @@
 import os
-import json
 from localsecrets.logger import log
-from localsecrets.config import DEFAULT_DB_FILE_DATA
 from filelock import FileLock
 
 class FileIO:
@@ -11,75 +9,66 @@ class FileIO:
         self._backup_path = f"{file_path}.backup"
         self._lock = FileLock(self._lock_path)
 
-
-    def create_db_file(self) -> bool:
-        if os.path.exists(self._file_path):
-            log(f'Cant create DB, {self._file_path} already exists', 'error')
-            return False
-        return self.save_db_file(DEFAULT_DB_FILE_DATA)
-
-
-    def read_db_file(self) -> dict:
+    def read_data(self) -> bytes | None:
         if not os.path.exists(self._file_path):
-            log(f'Cant read DB, {self._file_path} doesnt exist.', 'error')
+            log(f'Cannot read, {self._file_path} does not exist.', 'error')
             return None
         try:
             with self._lock:
                 with open(self._file_path, 'rb') as f:
-                    data = f.read()
-                return json.loads(data.decode('utf-8'))
-        except Exception:
-            return False
+                    return f.read()
+        except Exception as e:
+            log(f"Failed to read data: {e}", "error")
+            return None
         
-
-    def save_db_file(self, data: dict) -> bool:
+    def save_data(self, data: bytes) -> bool:
         try:
-            log("Attempting to acquire file lock...", "debug")
-            with self._lock.acquire():
-                log("Lock acquired.", "debug")
-                # Create backup if file exists
+            with self._lock:
+                # Step 1: Backup current file if it exists
+                self._backup_file()
+                log(f'Prepared backup for {self._file_path}', 'debug')
+
+                # Step 2: Write new data
+                with open(self._file_path, 'wb') as f:
+                    f.write(data)
+                log(f'Wrote data to {self._file_path}', 'debug')
+
+                # Step 3: Validate written content
+                with open(self._file_path, 'rb') as f:
+                    if f.read() == data:
+                        log('Validation successful: written data matches input', 'debug')
+                        if os.path.exists(self._backup_path):
+                            os.remove(self._backup_path)
+                            log(f'Removed backup file {self._backup_path}', 'debug')
+                        return True
+
+                # Step 4: Validation failed, restore backup
+                log('Validation failed: written file does not match input', 'error')
                 if os.path.exists(self._file_path):
-                    log(f'{self._file_path} already exists, creating backup.')
-                    if os.path.exists(self._backup_path):
-                        log(f'{self._backup_path} already exists, deleting.')
-                        os.remove(self._backup_path)
-                    log(f'Renaming {self._file_path} to {self._backup_path}')
-                    os.rename(self._file_path, self._backup_path)
+                    os.remove(self._file_path)
+                    log(f'Removed invalid file {self._file_path}', 'error')
+                    self._restore_backup()
                 
-                # Write new data
-                with open(self._file_path, 'w') as f:
-                    json.dump(data, f, indent=2)
-                    log(f'{self._file_path} open in write mode, data saved.')
-                
-                # Validate by reading back
-                with open(self._file_path, 'r') as f:
-                    log(f'Reading content of {self._file_path}')
-                    saved_data = json.load(f)
-                
-                if saved_data == data:
-                    # Remove backup on success
-                    log('Data match')
-                    if os.path.exists(self._backup_path):
-                        log(f'Removing {self._backup_path}')
-                        os.remove(self._backup_path)
-                    return True
+                if os.path.exists(self._file_path):
+                    log(f'Restore successful', 'debug')
                 else:
-                    # Restore backup on validation failure
-                    log(f'Data in {self._file_path} is wrong', 'error')
-                    if os.path.exists(self._file_path):
-                        log(f'Deleting {self._file_path}', 'warn')
-                        os.remove(self._file_path)
-                    if os.path.exists(self._backup_path):
-                        log(f'Restoring {self._file_path} from {self._backup_path}')
-                        os.rename(self._backup_path, self._file_path)
-                    else:
-                        log(f'{self._backup_path} not found, data was lost', 'error')
-                    return False
+                    log(f'Restore failed - data may be lost', 'error')
 
         except Exception as e:
-            log(e)
-            # Restore backup on any error
-            if os.path.exists(self._backup_path):
-                os.rename(self._backup_path, self._file_path)
+            log(f'Save error: {e}', 'error')
+            try:
+                self._restore_backup()
+                log('Restored from backup after exception', 'error')
+            except Exception as restore_err:
+                log(f"Failed to restore backup: {restore_err}", 'error')
             return False
-        
+
+    def _backup_file(self):
+        if os.path.exists(self._file_path):
+            if os.path.exists(self._backup_path):
+                os.remove(self._backup_path)
+            os.rename(self._file_path, self._backup_path)
+
+    def _restore_backup(self):
+        if os.path.exists(self._backup_path):
+            os.rename(self._backup_path, self._file_path)
