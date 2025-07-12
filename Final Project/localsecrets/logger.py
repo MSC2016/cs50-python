@@ -19,17 +19,11 @@ def log(message: str, level: str = 'info'):
     }
 
     frame = inspect.currentframe()
-    # print(frame)
     outer_frame = frame.f_back
-    # print(outer_frame)
     func_name = outer_frame.f_code.co_name
-    # print(func_name)
     local_vars = outer_frame.f_locals
-    # print(local_vars)
     class_name = local_vars['self'].__class__.__name__ if 'self' in local_vars else None
-    # print(class_name)
     location = f'{class_name}.{func_name}()' if class_name else f'{func_name}()'
-    # Timestamp
     timestamp = datetime.now().isoformat().split('.')[0].replace('T', ' ')
 
     # Log message

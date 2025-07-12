@@ -5,17 +5,13 @@ from localsecrets.config import DEFAULT_DB_FILE_DATA
 from localsecrets.datahandler import DataHandler
 
 def main():
-    dh = DataHandler('/mnt/d/db/secrets.db', 'kkk')
-    dh2 = DataHandler('/mnt/d/db/secrets2.db', 'kkk')
-    dh3 = DataHandler('/mnt/d/db/secrets3.db')
+    dh = DataHandler('/share/code/db/secrets.db', 'password')
+    dh2 = DataHandler('/share/code/db/secrets2.db', 'kkk')
+    dh3 = DataHandler('/share/code/db/secrets3.db')
 
-    dh.save('aaa')
+    dh.save(DEFAULT_DB_FILE_DATA)
     print(dh.load())
-
-    dh2.save('aaa')
     print(dh2.load())
-
-    dh3.save('aaa')
     print(dh3.load())
 
 def function_1():

@@ -35,3 +35,4 @@ class DataHandler:
         except Exception as e:
             log(f"Failed to save data: {e}", "error")
             return False
+
