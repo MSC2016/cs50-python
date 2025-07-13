@@ -45,27 +45,50 @@ decrypt(data: bytes, encryption_key: str) -> bytes | bool
 --------------------
 
 datahandler.py
-Encapsulates interaction between FileIO and crypto.
-serializes/dedeserializes JSON and handles encryption if a password is provided.
+
+Encapsulates secure interaction between file storage (via FileIO) and encryption (via Crypto).
+Responsible for loading and saving encrypted vault data from/to disk.
+Does not allow passwords to be passed directly in code.
+Supports password retrieval via system keyring or secure user prompt.
 
 Class: DataHandler
+
 Public Methods:
 
-__init__(file_path: str, password: str = None)
-	Initializes internal FileIO instance for the provided file path.
-	Accepts a password to enable encryption/decryption.
+__init__(file_path: str, password: str | None = None, vault_name: str | None = None, use_keyring: bool = True)
+	Initializes the handler for a given vault file.
+	- If password is explicitly passed, it is used (intended for CLI/setup only).
+	- If password is None:
+		- If use_keyring is True, attempts to load password from keyring using vault_name.
+		- If keyring lookup fails or use_keyring is False, prompts user at runtime.
+	Raises ValueError if vault_name is not provided and password is None.
 
 load() -> dict | None
-	Reads raw data from file using FileIO.
-	If a password is set, attempts to decrypt the data.
+	Reads raw data from file via FileIO.
+	If a password is set, decrypts the content.
 	Parses the decrypted (or raw) data from JSON.
 	Returns the parsed dictionary, or None on failure.
 
 save(data: dict) -> bool
 	Serializes the given dictionary to JSON and encodes as bytes.
 	If a password is set, encrypts the data.
-	Uses FileIO to write the data to disk.
-	Returns True on success, or False if saving fails.
+	Writes the result to disk via FileIO.
+	Returns True on success, False if saving fails or encryption error occurs.
+
+Behavior Notes:
+- Passwords are never hardcoded in source code or config.
+- Users are expected to securely store passwords via CLI (`KeyStore`) or enter them interactively.
+- DataHandler never writes to keyring — only reads if configured to.
+- Supports both encrypted and unencrypted vaults (if no password is used).
+
+Best Practices:
+- For vaults intended to be encrypted, always specify a `vault_name` and rely on `KeyStore`.
+- In headless environments (e.g., servers), users should ensure keyring access is configured, or pre-prompting is handled outside the runtime.
+
+Dependencies:
+- Crypto (for encryption/decryption)
+- FileIO (for file read/write)
+- KeyStore (optional, for retrieving password securely)
 
 --------------------
 
@@ -274,3 +297,34 @@ clear_bin(permanent: bool = False) -> bool
 
 --------------------
 
+keystore.py
+
+Implements the KeyStore class for secure password storage using the system keyring.
+
+Class: KeyStore
+Provides access to secure OS-level credential storage to store/retrieve vault passwords.
+Passwords are stored with vault name as the username, and a fixed or user-defined service name.
+
+Public Methods:
+
+__init__(service_name: str = "localsecrets")
+	Initializes a KeyStore instance with a given service name.
+	Default service_name is "localsecrets".
+
+set_key(vault_name: str, password: str) -> None
+	Saves the password associated with a vault name to the system keyring.
+
+get_key(vault_name: str) -> str | None
+	Retrieves the stored password for the vault.
+	Returns None if the password is not found.
+
+delete_key(vault_name: str) -> None
+	Deletes the password stored for the vault from the system keyring.
+
+has_key(vault_name: str) -> bool
+	Returns True if a password exists in the keyring for the given vault name.
+
+Usage Rules:
+- Passwords are never passed directly in code.
+- Passwords must be either stored via keyring (CLI recommended) or entered interactively by the user.
+- The vault system does not expose methods to store or pass passwords programmatically.
