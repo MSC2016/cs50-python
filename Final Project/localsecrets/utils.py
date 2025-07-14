@@ -3,7 +3,7 @@ from dependencies.pwinput import pwinput
 
 def get_password(message = "Enter password: ", mask="*"):
     try:
-        return pwinput.pwinput(message, mask)
+        return pwinput(message, mask)
     except KeyboardInterrupt:
         sys.exit('\n\nUser Abort -- Keyboard Interrupt\n')
 

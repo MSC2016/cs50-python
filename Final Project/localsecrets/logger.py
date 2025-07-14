@@ -7,12 +7,12 @@ def log(message: str, level: str = 'info'):
         return
 
     level = level.upper()
-    if level not in {'_INFO', '_WARN', 'ERROR', 'DEBUG'}:
+    if level not in {'INFO', 'WARN', 'ERROR', 'DEBUG'}:
         level = '_INFO'
 
     COLORS = {
-        '_INFO': '\033[94m',   # Blue
-        '_WARN': '\033[93m',   # Yellow
+        'INFO': '\033[94m',   # Blue
+        'WARN': '\033[93m',   # Yellow
         'ERROR': '\033[91m',  # Red
         'DEBUG': '\033[90m',  # Grey
         'END': '\033[0m'

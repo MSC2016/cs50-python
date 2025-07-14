@@ -1,4 +1,5 @@
 import os
+import sys
 from localsecrets.logger import log
 from filelock import FileLock
 
@@ -8,6 +9,9 @@ class FileIO:
         self._lock_path = f"{file_path}.lock"
         self._backup_path = f"{file_path}.backup"
         self._lock = FileLock(self._lock_path)
+
+    def file_exists(self):
+        return os.path.exists(self._file_path)
 
     def read_data(self) -> bytes | None:
         if not os.path.exists(self._file_path):
@@ -30,7 +34,7 @@ class FileIO:
                 # Step 2: Write new data
                 with open(self._file_path, 'wb') as f:
                     f.write(data)
-                log(f'Wrote data to {self._file_path}', 'debug')
+                log(f'Data saved to {self._file_path}', 'debug')
 
                 # Step 3: Validate written content
                 with open(self._file_path, 'rb') as f:
@@ -56,7 +60,7 @@ class FileIO:
         except Exception as e:
             log(f'Save error: {e}', 'error')
             try:
-                log('Trying to restore from backup after exception', 'info')
+                log('Trying to restore from backup after exception', 'warn')
                 self._restore_backup()
             except Exception as restore_err:
                 log(f"Failed to restore backup: {restore_err}", 'error')
