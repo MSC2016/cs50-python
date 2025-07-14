@@ -1,7 +1,6 @@
-import os
-import sys
 from localsecrets.logger import log
 from filelock import FileLock
+import os
 
 class FileIO:
     def __init__(self, file_path : str):
