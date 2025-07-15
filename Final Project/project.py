@@ -16,7 +16,6 @@ def test_secret_manager():
         print(sm.get_secret(secret))
 
 
-    # Save changes
     sm.save_to_file()
 
 if __name__ == '__main__':
