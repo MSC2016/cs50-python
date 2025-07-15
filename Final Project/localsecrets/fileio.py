@@ -33,7 +33,7 @@ class FileIO:
                 # Step 2: Write new data
                 with open(self._file_path, 'wb') as f:
                     f.write(data)
-                log(f'Data saved to {self._file_path}', 'debug')
+                    log(f'{len(data)} bytes saved to {self._file_path}')
 
                 # Step 3: Validate written content
                 with open(self._file_path, 'rb') as f:

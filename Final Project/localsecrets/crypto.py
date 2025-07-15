@@ -2,35 +2,18 @@ from cryptography.hazmat.primitives.kdf.pbkdf2 import PBKDF2HMAC
 from cryptography.hazmat.primitives.ciphers.aead import AESGCM
 from cryptography.hazmat.backends import default_backend
 from cryptography.hazmat.primitives import hashes
+from localsecrets.logger import log
 import os
 # Constants
-SALT_SIZE = 16
+SALT_SIZE = 32
 NONCE_SIZE = 12
 KEY_SIZE = 32  # 256 bits
 PBKDF2_ITERATIONS = 100000
-MAGIC_HEADER = b"\x00\x00\x00\x00\x00\x00\x00\x00LSE1\x00\x00\x00\x00\x00\x00\x00\x00" + r"""
-               _                         _
-              |_|                       |_|
-              | |         /^^^\         | |
-             _| |_      (| "o" |)      _| |_
-           _| | | | _    (_---_)    _ | | | |_
-          | | | | |' |    _| |_    | `| | | | |
-          \          /   /     \   \          /
-           \        /  / /(. .)\ \  \        /
-             \    /  / /  | . |  \ \  \    /
-               \  \/ /    ||Y||    \ \/  /
-                 \_/      || ||      \_/
-                          () ()
-                          || ||
-                         ooO Ooo
-      --------------------------------------------
-          The password is... nah, just kidding.
-""".encode("utf-8")
-
+MAGIC_HEADER = b'\x00\x00LSEv1\x00\x00'
 
 def _derive_key(password: str, salt: bytes) -> bytes:
     kdf = PBKDF2HMAC(
-        algorithm=hashes.SHA256(),
+        algorithm=hashes.SHA512(),
         length=KEY_SIZE,
         salt=salt,
         iterations=PBKDF2_ITERATIONS,
@@ -44,7 +27,9 @@ def encrypt(data: bytes, password: str) -> bytes:
     key = _derive_key(password, salt)
     aesgcm = AESGCM(key)
     ciphertext = aesgcm.encrypt(nonce, data, None)
-    return MAGIC_HEADER + salt + nonce + ciphertext
+    output = MAGIC_HEADER + salt + nonce + ciphertext
+    log(f'Encrypted {len(data)} bytes of data, result is {len(output)} bytes', 'debug')
+    return output
 
 def decrypt(data: bytes, password: str) -> bytes:
     if not data.startswith(MAGIC_HEADER):
@@ -61,5 +46,7 @@ def decrypt(data: bytes, password: str) -> bytes:
 
     key = _derive_key(password, salt)
     aesgcm = AESGCM(key)
-    return aesgcm.decrypt(nonce, ciphertext, None)
+    output = aesgcm.decrypt(nonce, ciphertext, None)
+    log(f'Decrypted {len(data)} bytes of data, result is {len(output)} bytes', 'debug')
+    return output
 
