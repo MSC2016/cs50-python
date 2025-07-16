@@ -6,7 +6,7 @@ DEFAULT_DB_FILE_DATA = {
     'meta-data' : {
         'created': datetime.now().isoformat(),
         'accessed' : datetime.now().isoformat(),
-        'moddified' : datetime.now().isoformat(),
+        'modified' : datetime.now().isoformat(),
     },
     'config' : {
         'soft_delete_secrets': True,
@@ -20,7 +20,7 @@ DEFAULT_VAULT_DATA = {
         'meta-data':{
             'created': datetime.now().isoformat(),
             'accessed' : datetime.now().isoformat(),
-            'moddified' : datetime.now().isoformat(),
+            'modified' : datetime.now().isoformat(),
         },
         'secrets' : {}
     }
