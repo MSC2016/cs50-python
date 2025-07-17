@@ -1,12 +1,13 @@
 from localsecrets.crypto import encrypt, decrypt
 from localsecrets.fileio import FileIO
 from localsecrets.logger import log
+from localsecrets.vaults import VaultManager
 from datetime import datetime
 from  localsecrets.config import DEFAULT_DB_FILE_DATA, DEFAULT_VAULT_DATA
 import json, copy, uuid
 
 class SecretManager:
-    def __init__(self, file_path: str, password =''):
+    def __init__(self, file_path: str, encryption_key =''):
         """
         
         """
@@ -14,8 +15,9 @@ class SecretManager:
         self._file_path = file_path
         self._data = {}
         self._current_vault = "default"
-        self._password = password
-        self._treat_file_as_plain_text = password == None
+        self._password = encryption_key
+        self._treat_file_as_plain_text = encryption_key == None
+
 
         if self._fileio.file_exists():
             log(f'Found {self._file_path}')
@@ -24,6 +26,33 @@ class SecretManager:
             log(f'{self._file_path} does not exist, creating a new file...')
             self._data = self._create_new_file_data()
             self.save_to_file()
+
+        #Refactoring
+        self.vaults = VaultManager(
+            self._data,
+            self.get_current_vault,
+            self.set_current_vault
+            )
+
+        ####################################
+
+    # PROPERTIES
+    @property
+    def current_vault(self):
+        return self.vaults[self._current_vault]
+    
+    
+    def get_current_vault(self):
+        return self._current_vault
+
+    def set_current_vault(self, name):
+        if name in self._data['vaults'].keys():
+            self._current_vault = name
+            return True
+        log(f'Could not set default vault to {name}', 'error')
+        return False
+
+    # DB FILE METHODS
 
     def get_db_metadata(self) -> dict:
         metadata = {
@@ -58,7 +87,7 @@ class SecretManager:
                 return True
         except Exception:
             log('Could not read/decrypt data, make sure to enter the right password.', 'error')
-            raise IOError('Could not read/decrypt data, make sure to enter the right password.')
+            raise IOError('Could not read/decrypt data, check the encryption key.')
 
     def save_to_file(self) -> bool:
         try:
@@ -75,95 +104,48 @@ class SecretManager:
             log(f"Save failed: {e}", "error")
             return False
         
-    def set_file_password(self, password = '') -> bool:
-        if password == None:
+    def set_encryption_key(self, encryption_key = '') -> bool:
+        if encryption_key == None:
             log(f'Encryption disabled, {self._file_path} will be saved as a plain text file.','warn')
             self._password = ''
             self._treat_file_as_plain_text = True
             return True
-        if isinstance(password,str):
+        if isinstance(encryption_key,str):
             self._treat_file_as_plain_text = False
-            self._password = password
+            self._password = encryption_key
             log('Encryption enabled.', 'info')
             return True
         raise ValueError('Password must be "None" to save as plain text, or a string of any length')
 
-    def create_vault(self, vault_name:str) -> bool:
-        if not self.vault_exists(vault_name) and len(vault_name) > 0:
-            self._data['vaults'][vault_name] = copy.deepcopy(DEFAULT_VAULT_DATA['this_name'])
-            return True
-        log(f'Vault "{vault_name}" already exists', 'warn')
-        return False
-    
-    def list_vaults(self) -> list:
-        return list(self._data['vaults'].keys())
-    
-    def set_default_vault(self, vault_name : str) -> bool:
-        if vault_name in self._data['vaults']:
-            self._current_vault = vault_name
-            return True
-        log(f'Could not set default vault to {vault_name}','error')
-        return False
-    
-    def rename_vault(self, old_name: str, new_name: str) -> bool:
-        if old_name == new_name:
-            log('Old and new vault names are the same.', 'warning')
-            return False
-        
-        if old_name == 'default':
-            log('You can nor rename the default vault.', 'error')
-            return False
-        
-        if not self.vault_exists(old_name):
-            log(f"Vault '{old_name}' does not exist.", 'error')
-            return False
 
-        if self.vault_exists(new_name):
-            log(f"Vault '{new_name}' already exists.", 'error')
-            return False
-
-        self._data['vaults'][new_name] = self._data['vaults'].pop(old_name)
-
-        if self._current_vault == old_name:
-            self._current_vault = new_name
-
-        log(f"Vault '{old_name}' renamed to '{new_name}'.", 'info')
-        return True
-
-    def vault_exists(self, vault_name: str) -> bool:
-        return vault_name in self._data['vaults']
+    # VAULT RELATED METHODS
 
     def delete_vault(self, vault_name: str, permanent: bool = False) -> bool:
-        if not self.vault_exists(vault_name):
-            log(f"Vault '{vault_name}' does not exist.", 'error')
-            return False
+        return self.vaults.delete(vault_name, permanent)
+    
+    def rename_vault(self, old_name: str, new_name: str) -> bool:
+        return self.vaults.rename(old_name, new_name)
 
-        if vault_name == self._current_vault:
-            log(f"Cannot delete the currently active vault '{vault_name}'.", 'error')
-            return False
+    def has_vault(self, vault_name: str) -> bool:
+        return vault_name in self._data['vaults']
 
-        if vault_name == 'default':
-            log("Cannot delete the 'default' vault.", 'error')
-            return False
-
-        secrets = list(self._data['vaults'][vault_name]['secrets'].keys())
-        
-        for secret_name in secrets:
-            self.delete_secret_entry(secret_name, vault_name=vault_name, permanent=permanent)
-
-        del self._data['vaults'][vault_name]
-        log(f"Vault '{vault_name}' has been {'permanently ' if permanent else ''}deleted.", 'info')
-        return True
-
+    def list_items(self, vault_name: str = '') -> list:
+        vault_name = vault_name or self._current_vault
+        return self.vaults.list_items(vault_name)
+    
+    ### TODO
     def get_vault_metadata(self, vault_name: str = '') -> dict:
         vault_name = vault_name or self._current_vault
 
-        if not self.vault_exists(vault_name):
+        if not self.has_vault(vault_name):
             log(f"Vault '{vault_name}' does not exist.", 'error')
             return None
 
         vault = self._data['vaults'][vault_name]
         return vault.get('meta-data', None)
+    
+    
+    # SECRET RELATED METHODS
 
     def add_secret_entry(self, secret_name: str = '', secret_data: str = '', vault_name: str = '') -> bool:
         vault_name = vault_name or self._current_vault
@@ -189,18 +171,18 @@ class SecretManager:
     def get_secret(self, secret_name: str, vault_name: str = '') -> dict:
         vault_name = vault_name or self._current_vault
 
-        if self.vault_exists(vault_name):
+        if self.has_vault(vault_name):
             secrets = self._data['vaults'][vault_name]['secrets']
             if secret_name in secrets:
                 secrets[secret_name]['meta-data']['accessed'] = datetime.now().isoformat()
                 return secrets[secret_name]['secret']
-            log(f"Secret '{secret_name}' not found in vault '{vault_name}'.", 'error')
+            log(f"Secret '{secret_name}' not found in vault '{vault_name}'.", 'info')
         return None
 
     def rename_secret_entry(self, old_name: str, new_name: str, vault_name: str = '') -> bool:
         vault_name = vault_name or self._current_vault
 
-        if not self.vault_exists(vault_name):
+        if not self.has_vault(vault_name):
             log(f"Vault '{vault_name}' does not exist.", 'error')
             return False
 
@@ -223,7 +205,7 @@ class SecretManager:
     def delete_secret_entry(self, secret_name: str, vault_name: str = '', permanent: bool = False) -> bool:
         vault_name = vault_name or self._current_vault
 
-        if not self.vault_exists(vault_name):
+        if not self.has_vault(vault_name):
             log(f"Vault '{vault_name}' does not exist.", 'error')
             return False
 
@@ -255,7 +237,7 @@ class SecretManager:
     def update_secret(self, secret_name: str, new_secret: str, vault_name: str = '') -> bool:
         vault_name = vault_name or self._current_vault
 
-        if self.vault_exists(vault_name):
+        if self.has_vault(vault_name):
             secrets = self._data['vaults'][vault_name]['secrets']
             if secret_name in secrets:
                 secrets[secret_name]['secret'] = new_secret
@@ -267,7 +249,7 @@ class SecretManager:
     def secret_exists(self, secret_name: str, vault_name: str = '') -> bool:
         vault_name = vault_name or self._current_vault
         
-        if not self.vault_exists(vault_name):
+        if not self.has_vault(vault_name):
             log(f"Vault '{vault_name}' does not exist.", 'error')
             return False
         
@@ -337,7 +319,7 @@ class SecretManager:
     def get_secret_metadata(self, secret_name: str, vault_name: str = '') -> dict:
         vault_name = vault_name or self._current_vault
 
-        if not self.vault_exists(vault_name):
+        if not self.has_vault(vault_name):
             log(f"Vault '{vault_name}' does not exist.", 'error')
             return None
 
@@ -349,13 +331,8 @@ class SecretManager:
 
         return secrets[secret_name].get('meta-data', None)
 
-    def list_secret_entries(self, vault_name: str = '') -> list:
-        vault_name = vault_name or self._current_vault
-        if self.vault_exists(vault_name):
-            return list(self._data['vaults'][vault_name]['secrets'].keys())
-        log(f"Vault '{vault_name}' not found.", 'error')
-        return []
 
+    # SOFT-DELETE/DELETE/RECOVERY RELATED
     def restore_secret_entry(self, deletion_id: str) -> bool:
         deleted_secrets = self._data.get('deleted_secrets', {})
 
@@ -368,7 +345,7 @@ class SecretManager:
         secret_name = deleted_entry['name']
         secret_data = deleted_entry['data']
 
-        if not self.vault_exists(vault_name):
+        if not self.has_vault(vault_name):
             log(f"Vault '{vault_name}' no longer exists. Creating it.", 'warn')
             self.create_vault(vault_name)
 
@@ -418,6 +395,8 @@ class SecretManager:
             log("No deleted secrets to purge.", 'info')
         return count
 
+
+    # USERDATA
     def set_user_data(self, secret_name: str, vault_name: str, user_data: dict) -> bool:
         vault_name = vault_name or self._current_vault
 
@@ -488,7 +467,10 @@ class SecretManager:
         return True
 
 
+    # PRIVATE
     def _create_new_file_data(self) -> dict:
         local_default_db_file_data = copy.deepcopy(DEFAULT_DB_FILE_DATA)
         local_default_db_file_data['vaults']['default'] = copy.deepcopy(DEFAULT_VAULT_DATA['this_name'])
         return local_default_db_file_data
+    
+

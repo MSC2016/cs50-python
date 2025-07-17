@@ -1,111 +1,52 @@
-from localsecrets.secret_manager import SecretManager
-import pprint
-
+from localsecrets.secretmanager import SecretManager
+import sys
 def main():
-    pp = pprint.PrettyPrinter(indent=2)
     sm = SecretManager('/share/code/db/secrets.db', None)
 
-    sm.create_vault('emails')
-    sm.create_vault('work')
-    sm.set_default_vault('emails')
+    print("Vaults:", sm.vaults.list())
+    print("Items:", sm.vaults['default'].list_items())
 
-    sm.add_secret_entry("gmail_addr", "g-password")
-    sm.add_secret_entry("yahoo_addr", "y-password")
-    sm.add_secret_entry("protonmail_addr", "p-password")
+    sm.vaults['default'].delete_item('gmail_addr')
+    print("items:", sm.vaults['default'].list_items())
 
-    pp.pprint(sm.list_secret_entries())
+    sm.vaults['default'].delete_item('github_token')
+    print("items:", sm.vaults['default'].list_items())
+    print("items:", sm.vaults.list_items('default'))
 
-    print("Getting secrets individually...")
-    pp.pprint(sm.get_secret("gmail_addr"))
-    pp.pprint(sm.get_secret("yahoo_addr"))
 
-    print("Renaming a secret...")
-    sm.rename_secret_entry("yahoo_addr", "yahoo-mail")
-    print('Renamed =', sm.secret_exists("yahoo-mail"))
+    print(sm.current_vault['yahoo_addr'].secret)
+    print(sm.current_vault['yahoo_addr']['secret'])
+    print(sm.current_vault['yahoo_addr'])
 
-    print("Updating secret...")
-    sm.update_secret("gmail_addr", "new_gmail_pass")
+    print("Vaults:", sm.vaults.list())
+    sm.vaults.delete('aa')
+    print("Vaults:", sm.vaults.list())
+    sm.vaults['emails'].delete()
+    print("Vaults:", sm.vaults.list())
+    sm.delete_vault('TEST-VAULT-777')
+    print("Vaults:", sm.vaults.list())
 
-    print("Copying secret to second vault...")
-    sm.copy_secret("gmail_addr", 'emails', 'work')
+    sm.vaults.add('aa')
+    print("Vaults:", sm.vaults.list())
+    sm.rename_vault('aa', 'bb')
+    print("Vaults:", sm.vaults.list())
+    sm.vaults['bb'].rename('cc')
+    print("Vaults:", sm.vaults.list())
+    sm.vaults.rename('cc','dd')
+    print("Vaults:", sm.vaults.list())
 
-    print("Moving secret to second vault...")
-    sm.move_secret("protonmail_addr", 'emails', 'work')
+    vaultname = 'dd'
+    print(sm.has_vault(vaultname))
+    print(sm.vaults.has(vaultname))
 
-    print("Setting 'work' as default and listing...")
-    sm.set_default_vault('work')
-    pp.pprint(sm.list_secret_entries())
+    vaultname = 'd2'
+    print(sm.has_vault(vaultname))
+    print(sm.vaults.has(vaultname))
 
-    print("Searching secrets with 'proton' in name...")
-    pp.pprint(sm.search_secrets("proton"))
+    print(sm.vaults.list_items('default'))
+    print(sm.vaults['default'].list_items())
+    print(sm.list_items('default'))
 
-    print("Secret metadata...")
-    pp.pprint(sm.get_secret_metadata("gmail_addr", 'work'))
 
-    print("Adding user data to secret...")
-    sm.set_user_data("gmail_addr", 'work', {"note": "Very important", "backup": "proton_addr"})
-
-    print("Reading user data...")
-    pp.pprint(sm.get_user_data("gmail_addr", 'work'))
-
-    print("Listing user data keys...")
-    pp.pprint(sm.list_user_data("gmail_addr", 'work'))
-
-    print("Deleting user data entry...")
-    sm.delete_user_data_entry("gmail_addr", 'work', "backup")
-    pp.pprint(sm.list_user_data("gmail_addr", 'work'))
-
-    print("Purging user data...")
-    sm.purge_user_data("gmail_addr", 'work')
-    pp.pprint(sm.list_user_data("gmail_addr", 'work'))
-
-    print("Deleting a secret entry (to recycle bin)")
-    pp.pprint(sm.list_secret_entries('work'))
-    sm.delete_secret_entry("gmail_addr", 'work')
-    pp.pprint(sm.list_secret_entries('work'))
-
-    print("Deleted secrets:")
-    pp.pprint(sm.list_deleted_secrets())
-
-    print("Restoring deleted 'gmail_addr'")
-    deleted = sm.list_deleted_secrets()
-    gmail_entry = next((entry for entry in deleted if entry.get('name') == 'gmail_addr'), None)
-
-    if gmail_entry:
-        sm.restore_secret_entry(gmail_entry['uuid'])  # or 'deletion_id' if that's the actual field
-    else:
-        print("No deleted secret named 'gmail_addr' found.")
-
-    print("Deleting secret permanently...")
-    sm.delete_secret_entry("gmail_addr", 'work', permanent=True)
-    pp.pprint(sm.list_secret_entries('work'))
-    pp.pprint(sm.list_deleted_secrets())
-    
-    print("Purging all deleted secrets...")
-    sm.purge_deleted_secrets()
-    pp.pprint(sm.list_deleted_secrets())
-
-    print("Vault metadata:")
-    pp.pprint(sm.get_vault_metadata('work'))
-
-    print("Saving to file...")
-    sm.save_to_file()
-
-    print("DB Metadata:")
-    pp.pprint(sm.get_db_metadata())
-
-    print("Final vault list:")
-    pp.pprint(sm.list_vaults())
-
-    print("Renaming a vault...")
-    sm.rename_vault('work', "work_renamed")
-    pp.pprint(sm.list_vaults())
-
-    print("Deleting a vault...")
-    sm.set_default_vault('default')
-    sm.delete_vault("work_renamed", permanent=True)
-
-    sm.save_to_file()
-
-if __name__ == '__main__':
+if __name__ == "__main__":
     main()
