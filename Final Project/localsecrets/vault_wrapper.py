@@ -1,4 +1,4 @@
-from localsecrets.itemwrapper import ItemWrapper
+from localsecrets.item import Item
 
 class VaultWrapper:
     def __init__(self, name: str, data: dict, vault_manager):
@@ -6,14 +6,13 @@ class VaultWrapper:
         self._data = data
         self._vault_manager = vault_manager
 
-    def __getitem__(self, item_name: str) -> ItemWrapper:
-        secrets = self._data.get("secrets", {})
-        if item_name not in secrets:
+    def __getitem__(self, item_name: str) -> Item:
+        if item_name not in self._data:
             raise KeyError(f"Item '{item_name}' not found in vault '{self._name}'")
-        return ItemWrapper(secrets[item_name])
+        return Item(self._data[item_name])
 
     def list_items(self) -> list:
-        return list(self._data.get('secrets', {}).keys())
+        return list(self._data.get('items', {}).keys())
 
     def set_default(self) -> bool:
         return self._vault_manager.set_default(self._name)
@@ -29,3 +28,6 @@ class VaultWrapper:
 
     def list_items(self) -> list:
         return self._vault_manager.list_items(self._name)
+    
+    def add_item(self, name, secret)-> bool:
+        return self._vault_manager.add_item(name, secret, self._name)

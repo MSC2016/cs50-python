@@ -1,15 +1,13 @@
 class Item:
-    def __init__(self, data: dict):
-        self._data = data
+    def __init__(self, item_data: dict):
+        self._data = item_data
 
-    @property
-    def secret(self):
-        return self._data.get("secret")
+    def set_data(self, key: str, value):
+        self._data.setdefault("user-data", {})[key] = value
 
-    @property
-    def metadata(self):
-        return self._data.get("metadata", {})
+    def get_data(self, key: str, default=None):
+        return self._data.get("user-data", {}).get(key, default)
 
-    @property
-    def user_data(self):
-        return self._data.get("user-data", {})
+    def __repr__(self):
+        return self._data.get('secret')
+

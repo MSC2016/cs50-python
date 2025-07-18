@@ -1,27 +1,9 @@
-from datetime import datetime
-
 DEBUG = True
 
 DEFAULT_DB_FILE_DATA = {
-    'meta-data' : {
-        'created': datetime.now().isoformat(),
-        'accessed' : datetime.now().isoformat(),
-        'modified' : datetime.now().isoformat(),
-    },
     'config' : {
-        'soft_delete_secrets': True,
+        'soft_delete_items': True,
     },
     'vaults': {},
-    'deleted_secrets': {},
-}
-
-DEFAULT_VAULT_DATA = {
-    'this_name': {
-        'meta-data':{
-            'created': datetime.now().isoformat(),
-            'accessed' : datetime.now().isoformat(),
-            'modified' : datetime.now().isoformat(),
-        },
-        'secrets' : {}
-    }
+    'deleted_items': {},
 }

@@ -1,6 +1,7 @@
 import sys
 from dependencies.pwinput import pwinput
 
+
 def get_password(message = "Enter password: ", mask="*"):
     try:
         return pwinput(message, mask)
