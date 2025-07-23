@@ -1,9 +1,7 @@
-DEBUG = True
+from datetime import datetime
 
-DEFAULT_DB_FILE_DATA = {
-    'config' : {
-        'soft_delete_items': True,
-    },
-    'vaults': {},
-    'deleted_items': {},
-}
+DEBUG = True
+version = 1.0
+
+def now():
+    return datetime.now().isoformat().split('.')[0].replace('T', ' ')

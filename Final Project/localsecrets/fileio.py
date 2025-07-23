@@ -23,19 +23,15 @@ class FileIO:
         except Exception as e:
             log(f"Failed to read data: {e}", "error")
             return None
-        
+
     def save_data(self, data: bytes) -> bool:
         try:
             with self._lock:
-                # Step 1: Backup current file if it exists
                 self._backup_file()
-
-                # Step 2: Write new data
                 with open(self._file_path, 'wb') as f:
                     f.write(data)
                     log(f'{len(data)} bytes saved to {self._file_path}')
 
-                # Step 3: Validate written content
                 with open(self._file_path, 'rb') as f:
                     if f.read() == data:
                         log('Validation successful: saved data matches input', 'debug')
@@ -44,18 +40,12 @@ class FileIO:
                             log(f'Removed backup file {self._backup_path}', 'debug')
                         return True
 
-                # Step 4: Validation failed, restore backup
                 log('Validation failed: written file does not match input', 'error')
                 if os.path.exists(self._file_path):
                     os.remove(self._file_path)
                     self._restore_backup()
-                
-                if os.path.exists(self._file_path):
-                    log(f'Restore successful', 'debug')
-                else:
-                    log(f'Restore failed - data may be lost', 'error')
-                    return False
-                
+
+                return os.path.exists(self._file_path)
         except Exception as e:
             log(f'Save error: {e}', 'error')
             try:

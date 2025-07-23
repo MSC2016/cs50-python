@@ -4,10 +4,10 @@ from cryptography.hazmat.backends import default_backend
 from cryptography.hazmat.primitives import hashes
 from localsecrets.logger import log
 import os
-# Constants
+
 SALT_SIZE = 32
 NONCE_SIZE = 12
-KEY_SIZE = 32  # 256 bits
+KEY_SIZE = 32
 PBKDF2_ITERATIONS = 100000
 MAGIC_HEADER = b'\x00\x00LSEv1\x00\x00'
 
@@ -34,7 +34,7 @@ def encrypt(data: bytes, password: str) -> bytes:
 def decrypt(data: bytes, password: str) -> bytes:
     if not data.startswith(MAGIC_HEADER):
         raise ValueError("Data is not in expected encrypted format")
-        
+
     header_len = len(MAGIC_HEADER)
     salt_start = header_len
     salt_end = salt_start + SALT_SIZE
@@ -49,4 +49,3 @@ def decrypt(data: bytes, password: str) -> bytes:
     output = aesgcm.decrypt(nonce, ciphertext, None)
     log(f'Decrypted {len(data)} bytes of data, result is {len(output)} bytes', 'debug')
     return output
-
