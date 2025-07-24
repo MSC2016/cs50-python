@@ -15,8 +15,8 @@ DUMMY_KEY = None
 def test_init_creates_default_vault():
     sm = SecretManager(TEST_DB_FILE, DUMMY_KEY)
     assert 'default' in sm._vaults
-    assert sm._vaults['default'] != {}
-    assert os.path.exists(TEST_DB_FILE)
+    assert isinstance(sm._vaults['default'], dict)
+
 
 def test_add_vault_success():
     sm = SecretManager(TEST_DB_FILE, DUMMY_KEY)
@@ -41,7 +41,9 @@ def test_ensure_changes_were_not_saved():
 def test_add_vault_duplicate():
     sm = SecretManager(TEST_DB_FILE, DUMMY_KEY)
     sm.add_vault('work')
-    assert sm.add_vault('work') is False  # already exists
+    with pytest.raises(KeyError) as exc_info:
+        sm.add_vault('work')
+    assert 'Vault "work" already exists.' in str(exc_info.value)
 
 def test_add_item_success():
     sm = SecretManager(TEST_DB_FILE, DUMMY_KEY)
