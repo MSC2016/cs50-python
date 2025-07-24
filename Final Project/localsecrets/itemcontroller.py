@@ -117,7 +117,7 @@ class ItemController:
         result = item.purge_user_data()
         return result
 
-    def restore_deleted_item(self, uuid: str, dst_vault: str | None = None) -> bool:
+    def restore_deleted(self, uuid: str, dst_vault: str | None = None) -> bool:
         if uuid not in self._manager._deleted_items:
             raise KeyError(f'Deleted item with UUID "{uuid}" not found.')
 

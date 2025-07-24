@@ -50,6 +50,6 @@ def test_restore_soft_deleted_item(test_db_path):
 
     uuid = deleted_items[0]['uuid']  # get the UUID string properly
 
-    assert sm.item.restore_deleted_item(uuid,'vault') is True
+    assert sm.item.restore_deleted(uuid,'vault') is True
     # After restoring, the item should be back in the vault:
     assert 'item1' in sm._vaults['vault']

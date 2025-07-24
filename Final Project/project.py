@@ -48,6 +48,9 @@ def main():
     print(sm.item.list_deleted())
 
     uuids = sm.item.list_deleted()
+
+    sm.add_vault('restored')
+    sm.item.restore_deleted(uuids[0]['uuid'],'restored')
     print('\n\n')
     print(sm.item.search('binance', pprint=True))
 

@@ -214,27 +214,3 @@ class SecretManager:
     def list_vaults(self) -> list[str]:
         """Returns a list of all existing vault names."""
         return list(self._vaults.keys())
-
-    def restore_item(self, vault_name: str, item_name: str) -> bool:
-        """
-        Restore a soft-deleted item back to its original vault.
-        """
-        if vault_name not in self._vaults:
-            raise KeyError(f'Vault "{vault_name}" not found.')
-
-        if vault_name not in self._deleted_items:
-            return False
-
-        if item_name not in self._deleted_items[vault_name]:
-            return False
-
-        # Restore the item
-        item_data = self._deleted_items[vault_name].pop(item_name)
-        self._vaults[vault_name][item_name] = item_data
-
-        # Clean up empty deleted vault
-        if not self._deleted_items[vault_name]:
-            del self._deleted_items[vault_name]
-
-        self.save_db_file()
-        return True
