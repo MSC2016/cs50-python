@@ -10,9 +10,21 @@ class FileIO:
         self._lock = FileLock(self._lock_path)
 
     def file_exists(self):
+        '''
+        Checks whether the secrets file exists.
+
+        Returns:
+            bool: True if the file exists.
+        '''
         return os.path.exists(self._file_path)
 
     def read_data(self) -> bytes | None:
+        '''
+        Reads and returns binary data from the file.
+
+        Returns:
+            bytes | None: The file contents if read successfully, otherwise None.
+        '''
         if not os.path.exists(self._file_path):
             log(f'Cannot read, {self._file_path} does not exist.', 'error')
             return None
@@ -25,6 +37,12 @@ class FileIO:
             return None
 
     def save_data(self, data: bytes) -> bool:
+        '''
+        Saves data to the file.
+
+        Returns:
+            bool: True if the data was saved and validated successfully.
+        '''
         try:
             with self._lock:
                 self._backup_file()

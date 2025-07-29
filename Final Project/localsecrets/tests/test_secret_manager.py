@@ -59,12 +59,8 @@ def test_save_and_load_cycle():
     sm.add_vault('vault1')
     sm.add_item('entry1', 'secret1', 'vault1')
     sm.save_db_file()
-    id1 = id(sm)
     del(sm)
     sm = SecretManager(TEST_DB_FILE, DUMMY_KEY)
-    id2 = id(sm)
     assert 'vault1' in sm._vaults
     assert 'entry1' in sm._vaults['vault1']
     assert sm._vaults['vault1']['entry1']['secret'] == 'secret1'
-    assert id1 != id2
-

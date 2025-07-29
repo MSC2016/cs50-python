@@ -1,6 +1,6 @@
 from datetime import datetime
 
-DEBUG = True
+DEBUG = False
 version = 1.0
 
 def now():

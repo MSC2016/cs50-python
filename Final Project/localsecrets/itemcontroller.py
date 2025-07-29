@@ -13,11 +13,23 @@ class ItemController:
         return Item(vault[item_name])
 
     def add(self, item_name: str, secret: str) -> bool:
+        '''
+        Adds a new item with the given secret.
+
+        Returns:
+            bool: True if the item was successfully added.
+        '''
         result = self._manager.add_item(item_name, secret)
         return result
 
 
     def rename(self, item_name: str, new_name: str) -> bool:
+        '''
+        Renames an item in the current vault.
+
+        Returns:
+            bool: True if the rename was successful.
+        '''
         vault = self._manager._vaults[self._manager._current_vault]
         if item_name not in vault:
             raise KeyError(f'Item "{item_name}" not found.')
@@ -31,14 +43,22 @@ class ItemController:
 
 
     def delete(self, item_name: str, permanent: bool = False) -> bool:
-        """
-        Delete an item from the current vault.
-        If permanent is False and soft delete is enabled, move to deleted_items.
-        """
+        '''
+        Deletes an item from the current vault, If not permanent and soft delete is enabled,
+        moves the item to deleted items, otherwise the item is permantly deleted.
+
+        Returns:
+            bool: True if the deletion was successful.
+        '''
         return self._manager.delete_item(self._manager._current_vault, item_name, permanent=permanent)
     
     def rename(self, item_name: str, new_name: str) -> bool:
-        """Rename an item in the current vault."""
+        '''
+        Renames an item within the current vault.
+
+        Returns:
+            bool: True if the rename was successful.
+        '''
         vault = self._manager._vaults[self._manager._current_vault]
 
         if item_name not in vault:
@@ -47,19 +67,22 @@ class ItemController:
             raise KeyError(f'Item "{new_name}" already exists.')
 
         vault[new_name] = vault.pop(item_name)
-
-        item = vault[new_name]
         return True
     
     def list_(self) -> list[str]:
-        """Returns a list of all item names in the current vault."""
+        '''
+        Returns a sorted list of all item names in the current vault.
+        '''
         vault = self._manager._vaults[self._manager._current_vault]
         return sorted(name for name in vault)
 
     def set_user_data(self, item_name: str, key: str, value) -> bool:
-        """
-        Add or update user-defined data for an item.
-        """
+        '''
+        Adds or updates user-defined data for a specific item.
+
+        Returns:
+            bool: True if the data was successfully set.
+        '''
         vault = self._manager._vaults[self._manager._current_vault]
 
         if item_name not in vault:
@@ -78,9 +101,13 @@ class ItemController:
 
 
     def get_user_data(self, item_name: str, key: str, default=None):
-        """
-        Retrieve user-defined data for an item.
-        """
+        '''
+        Retrieves user-defined data for a specific item.
+
+        Returns:
+            Any: The value associated with the user-data key, or the default if missing.
+
+        '''
         vault = self._manager._vaults[self._manager._current_vault]
 
         if item_name not in vault:
@@ -98,26 +125,55 @@ class ItemController:
         return value
 
     def list_user_data_keys(self, item_name: str) -> list[str]:
+        '''
+        Lists all user-data keys for the specified item.
+
+        Returns:
+            list[str]: A list of user-data key names.
+        '''
         item = self(item_name)
         return item.list_user_data_keys()
 
     def delete_user_data_key(self, item_name: str, key: str) -> bool:
+        '''
+        Deletes a user-data key from the specified item.
+
+        Returns:
+            bool: True if the key was successfully deleted.
+        '''
         item = self(item_name)
         result = item.delete_user_data_key(key)
         return result
 
     def rename_user_data_key(self, item_name: str, old_key: str, new_key: str) -> bool:
-        """Rename a user-data key on an item."""
+        '''
+        Renames a user-data key within a specified item.
+
+        Returns:
+            bool: True if the key was successfully renamed.
+        '''
         item = self(item_name)
         result = item.rename_user_data_key(old_key, new_key)
         return result
 
     def purge_user_data(self, item_name: str) -> bool:
+        '''
+        Removes all user-specific data from the specified item.
+        Returns:
+            bool: True if the user data was successfully purged.
+        '''
         item = self(item_name)
         result = item.purge_user_data()
         return result
 
     def restore_deleted(self, uuid: str, dst_vault: str | None = None) -> bool:
+        '''
+        Restores a deleted item to a specified vault.
+
+        Returns:
+            bool: True if the item was successfully restored.
+
+        '''
         if uuid not in self._manager._deleted_items:
             raise KeyError(f'Deleted item with UUID "{uuid}" not found.')
 
@@ -145,11 +201,19 @@ class ItemController:
 
 
     def pprint_deleted(self) -> None:
-        """Print deleted items with pretty formatting."""
+        '''
+        Prints all deleted items in a readable, formatted JSON style.
+        '''
         for item in self.list_deleted():
             print(json.dumps(item, indent=4))
 
     def list_deleted(self, vault: str | None = None, name_contains: str | None = None) -> list[dict]:
+        '''
+        Lists deleted items filtered by vault and/or name substring.
+
+        Returns:
+            list[dict]: List of deleted items matching the filters, each including its UUID and user data.
+        '''
         items = []
         for uuid, item in self._manager._deleted_items.items():
             if vault and item.get("vault") != vault:
@@ -161,6 +225,12 @@ class ItemController:
 
 
     def purge_deleted_item(self, uuid: str) -> bool:
+        '''
+        Permanently removes a deleted item by its UUID.
+
+        Returns:
+            bool: True if the item was successfully purged.
+        '''
         if uuid not in self._manager._deleted_items:
             raise KeyError(f'Deleted item with UUID "{uuid}" not found.')
         del self._manager._deleted_items[uuid]
@@ -168,11 +238,24 @@ class ItemController:
 
 
     def purge_all_deleted_items(self) -> int:
+        '''
+        Permanently removes all deleted items from the manager.
+
+        Returns:
+            int: The number of deleted items purged.
+        '''
         count = len(self._manager._deleted_items)
         self._manager._deleted_items.clear()
         return count
     
-    def search(self, term: str, vault: str | None = None, pprint: bool = False) -> list[dict]:
+    def search(self, term: str, vault: str | None = None) -> list[dict]:
+        '''
+        Searches for items matching a term in specified vault or all vaults.
+
+        Returns:
+            list[dict]: List of matching items and deleted items with metadata:
+                        Each dict contains keys: 'type', 'vault', 'item_name', 'uuid', 'data'.
+        '''
         results = []
         term_lower = term.lower()
 
@@ -215,4 +298,4 @@ class ItemController:
                     'data': deleted.get('data'),
                 })
 
-        return results if not pprint else json.dumps(results, indent=4)
+        return results

@@ -22,6 +22,12 @@ def _derive_key(password: str, salt: bytes) -> bytes:
     return kdf.derive(password.encode('utf-8'))
 
 def encrypt(data: bytes, password: str) -> bytes:
+    '''
+    Encrypts data using AES-GCM with a password-derived key.
+
+    Returns:
+        bytes: The encrypted data including header, salt, nonce, and ciphertext.
+    '''
     salt = os.urandom(SALT_SIZE)
     nonce = os.urandom(NONCE_SIZE)
     key = _derive_key(password, salt)
@@ -32,6 +38,16 @@ def encrypt(data: bytes, password: str) -> bytes:
     return output
 
 def decrypt(data: bytes, password: str) -> bytes:
+    '''
+    Decrypts encrypted data using the provided password.
+
+    Returns:
+        bytes: The decrypted plaintext.
+
+    Raises:
+        ValueError: If the data is not in the expected encrypted format.
+        Exception: If decryption fails due to an invalid key or corrupted data.
+    '''
     if not data.startswith(MAGIC_HEADER):
         raise ValueError("Data is not in expected encrypted format")
 

@@ -1,60 +1,77 @@
 from localsecrets.secretmanager import SecretManager
-from localsecrets.config import DEBUG
-
+import os
 
 def main():
-    sm = SecretManager('/share/code/db/secrets.db', None)
+    path = "secrets.db"
+    sm = create_manager(path)
 
-    try:
-        sm.add_vault('work')
-    except KeyError:
-        pass
-    sm.set_current_vault('default')
-    print(sm.item.add('accuweather','accuweather api key'))
-    print(sm.item.add('not-imdb','not-imdb api key'))
-    sm.save_db_file()
-    sm.item.rename('not-imdb','--imdb--')
-    sm['default'].rename_item('--imdb--','imdb')
-    sm['default']['accuweather'].set_user_data('thiss','is used to check the weatherzz')
-    sm['default']['accuweather'].set_user_data('thiss','is used to check the weather')
-    sm['default']['accuweather'].rename_user_data_key('thiss','thiszzz')
-    sm.item.rename_user_data_key('accuweather','thiszzz','this')
-    sm.item.set_user_data('accuweather','is not','the binance api key')
-    print(sm.item.get_user_data('accuweather','this'))
-    print(sm['default']['accuweather'].get_user_data('is not'))
-    print(sm['default']['accuweather'].list_user_data_keys())
-    print(sm.item('accuweather').list_user_data_keys())
-    sm.item.delete_user_data_key('accuweather','this')
-    sm['default']['accuweather'].delete_user_data_key('is not')
-    sm.item.purge_user_data('accuweather')
-    print(sm['default']['accuweather'].list_user_data_keys())
-    print(sm.item('accuweather').list_user_data_keys())
-    sm.add_item('binance2','my binance api key')
-    sm.add_item('accuweather2','my accuweather api key')
-    sm.add_item('imdb2','my not imdb api key')
-    sm.add_item('google something2','my binance api key')
-    sm.item.rename('imdb2', 'not-imdb2')
-    sm.item.delete('not-imdb2')
-    sm.item('binance2').set_user_data('ttt','ddd')
-    sm.item.delete('binance2')
-    print(sm.get_secret('accuweather'))
-    print(sm.get_secret('imdb'))
-    sm.add_item('teste-delete','useless api key')
-    sm.set_current_vault('default')
-    sm.delete_vault('work')
-    print(sm.list_vaults())
-    print(sm.item.list_())
-    print(sm.item.pprint_deleted())
-    print(sm.item.list_deleted())
+    # Add secrets to two vaults
+    add_secret(sm, "work", "email", "work-email-pass")
+    add_secret(sm, "work", "slack", "slack-api-key")
+    add_secret(sm, "personal", "netflix", "netflix-password")
 
-    uuids = sm.item.list_deleted()
+    # Move item from one vault to another
+    move_item(sm, "personal", "archived", "netflix")
 
-    sm.add_vault('restored')
-    sm.item.restore_deleted(uuids[0]['uuid'],'restored')
-    print('\n\n')
-    print(sm.item.search('binance', pprint=True))
+    # Add and get user-defined metadata
+    sm.set_current_vault("work")
+    sm.item.set_user_data("email", "note", "Used for internal comms")
+    note = sm.item.get_user_data("email", "note")
+    print("Note on work email:", note)
+
+    # Search for all items containing a keyword
+    results = search_items(sm, "slack")
+    print("Search for 'slack':", [r["item_name"] for r in results])
+
+    # Delete and restore an item into a recovery vault
+    delete_and_restore(sm, "work", "slack", "recovery")
+
+    # Final state
+    print("Vaults:", sm.list_vaults())
+    print("Work vault items:", list_items_in_vault(sm, "work"))
+    print("Recovery vault items:", list_items_in_vault(sm, "recovery"))
+    print("Archived vault items:", list_items_in_vault(sm, "archived"))
 
     sm.save_db_file()
+
+def create_manager(path: str, encryption_key=None) -> SecretManager:
+    if os.path.exists(path):
+        os.remove(path)
+    return SecretManager(path, encryption_key)
+
+def add_secret(manager: SecretManager, vault: str, item: str, secret: str) -> bool:
+    if vault not in manager._vaults:
+        manager.add_vault(vault)
+    manager.set_current_vault(vault)
+    return manager.add_item(item, secret)
+
+def list_items_in_vault(manager: SecretManager, vault: str = None) -> list[str]:
+    if vault:
+        manager.set_current_vault(vault)
+    return manager.item.list_()
+
+def move_item(manager: SecretManager, vault_from: str, vault_to: str, item_name: str) -> bool:
+    manager.set_current_vault(vault_from)
+    manager.item.delete(item_name, permanent=False)
+    deleted = manager.item.list_deleted()
+    if not deleted:
+        return False
+    uuid = deleted[0]["uuid"]
+    manager.add_vault(vault_to)
+    return manager.item.restore_deleted(uuid, vault_to)
+
+def delete_and_restore(manager: SecretManager, vault: str, item_name: str, recovery_vault: str) -> bool:
+    manager.set_current_vault(vault)
+    manager.item.delete(item_name, permanent=False)
+    deleted = manager.item.list_deleted()
+    if not deleted:
+        return False
+    uuid = deleted[0]["uuid"]
+    manager.add_vault(recovery_vault)
+    return manager.item.restore_deleted(uuid, recovery_vault)
+
+def search_items(manager: SecretManager, keyword: str) -> list[dict]:
+    return manager.item.search(keyword)
 
 
 if __name__ == "__main__":

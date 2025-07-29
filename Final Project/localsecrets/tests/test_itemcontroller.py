@@ -34,7 +34,7 @@ def test_delete_and_restore_item(ic):
     # Restore deleted item
     deleted = list(ic._manager._deleted_items.keys())
     assert len(deleted) == 1
-    assert ic.restore_deleted_item(deleted[0]) is True
+    assert ic.restore_deleted(deleted[0]) is True
     assert 'item1' in ic.list_()
 
 def test_set_get_user_data(ic):

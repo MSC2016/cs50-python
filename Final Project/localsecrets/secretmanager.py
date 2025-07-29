@@ -11,6 +11,16 @@ import json
 
 class SecretManager:
     def __init__(self, file_path, encription_key = ''):
+        '''
+        Initializes the SecretManager.
+
+        Parameters:
+        file_path (str): Path to the secrets database file. If the file exists, it will be loaded; 
+                         otherwise, a new file will be created.
+        encription_key (str or None, optional): Encryption key used to encrypt/decrypt data.
+                    If set to a string, encryption is enabled.
+                    If set to None (keyword), encryption is disabled.
+        '''
         self._file_path = file_path
         self._encription_key = encription_key
         self._fileIO = FileIO(file_path)
@@ -21,7 +31,7 @@ class SecretManager:
         self._vaults = None
         self._deleted_items = None
         self._current_vault = 'default'
-        loaded = self.load_db_file()
+        loaded = self._load_db_file()
         if loaded and self._version != version:
             raise ValueError(f'incorrect DB file version, expected v{version}, file is v{self._version}')
         
@@ -36,7 +46,7 @@ class SecretManager:
         return ItemController(self)
 
     
-    def load_db_file(self):
+    def _load_db_file(self):
         if not self._fileIO.file_exists():
             log(f'File {self._file_path} doesn’t exist. Initializing new database.', 'warn')
             self._version = 1.0
@@ -49,7 +59,6 @@ class SecretManager:
             return True
         else:
             self._raw_data = self._fileIO.read_data()
-
         try:
             decrypted = decrypt(self._raw_data, self._encription_key) if self._encription_key is not None else (self._raw_data, None)
             parsed = json.loads(decrypted[0] if isinstance(decrypted, tuple) else decrypted)
@@ -77,7 +86,13 @@ class SecretManager:
 
 
     def save_db_file(self):
-        if not self.data_is_valid():
+        '''
+        Save changes to secret manager instance.
+
+        Returns:
+            bool: True if successfull.
+        '''
+        if not self._validate_data():
             raise ValueError('Invalid data')
         json_data = json.dumps({
             'version': version,
@@ -90,7 +105,7 @@ class SecretManager:
         data = encrypt(json_data, self._encription_key) if self._encription_key is not None else json_data
         return self._fileIO.save_data(data)
     
-    def data_is_valid(self):
+    def _validate_data(self):
         problem = []
         if not isinstance(self._vaults, dict):
             problem.append('self._vaults')
@@ -105,6 +120,12 @@ class SecretManager:
         return True
 
     def add_vault(self, vault_name: str) -> bool:
+        '''
+        Add a vault to the secret manager.
+
+        Returns:
+            bool: True if successfull.
+        '''
         if self._vaults is None:
             self._vaults = {}
 
@@ -118,6 +139,12 @@ class SecretManager:
         return True
 
     def rename_vault(self, vault_name: str, new_name: str) -> bool:
+        '''
+        Rename a vault.
+
+        Returns:
+            bool: True if successfull.
+        '''
         if not isinstance(vault_name, str) or not isinstance(new_name, str):
             raise ValueError('vault_name and new_name must be strings.')
         
@@ -144,27 +171,53 @@ class SecretManager:
             
 
     def add_item(self, item_name: str, item_secret: str, vault_name: str = '') -> bool:
+        '''
+        Adds an Item to a vault.
+
+        Returns:
+            bool: True if successfull.
+        '''
         vault_name = vault_name if vault_name else self._current_vault
         if vault_name not in self._vaults:
             raise KeyError(f'Vault "{vault_name}" does not exist.')
         vault = self[vault_name]
         return vault.add_item(item_name, item_secret)
     
-    def get_item(self, item: str, vault_name: str = '', secret_only: bool = False):
+    def get_item(self, item_name: str, vault_name: str = '', secret_only: bool = False):
+        '''
+        Retrieves an item from a vault.
+
+        Returns:
+            Any: The item data or secret value, depending on the `secret_only` flag.
+
+        '''
         vault_name = vault_name if vault_name else self._current_vault
         if vault_name not in self._vaults:
             raise KeyError(f'Vault "{vault_name}" not found.')
         vault = self[vault_name]
-        return vault.get_item(item, secret_only)
+        return vault.get_item(item_name, secret_only)
 
-    def get_secret(self, item: str, vault_name: str = '') -> str:
-        return self.get_item(item, vault_name, True)
+    def get_secret(self, item_name: str, vault_name: str = '') -> str:
+        '''
+        Retrieves a secret item from a vault.
+
+        Parameters:
+            item (str): The name of the item to retrieve.
+            vault_name (str): Name of the vault. Defaults to the current vault if not specified.
+
+        Returns:
+            str: The secret value.
+        '''
+        return self.get_item(item_name, vault_name, True)
 
     def delete_item(self, vault_name: str, item_name: str, permanent: bool = False) -> bool:
-        """
-        Delete an item from a vault. If soft delete is enabled, and not explicitly permanent,
+        '''
+        Delete an item from a vault, if soft delete is enabled, and not explicitly permanent,
         move item to deleted_items instead of erasing it.
-        """
+
+        Returns:
+            bool: True if successfull.
+        '''
         vault = self._vaults.get(vault_name)
         if not vault:
             raise KeyError(f'Vault "{vault_name}" not found.')
@@ -183,10 +236,13 @@ class SecretManager:
         return True
     
     def delete_vault(self, vault_name: str, permanent: bool = False) -> bool:
-        """
+        '''
         Delete a vault. If vault has items and soft delete is enabled,
         move items to deleted_items unless permanent is True.
-        """
+
+        Returns:
+            bool: True if successfull.
+        '''
         if vault_name not in self._vaults:
             raise KeyError(f'Vault "{vault_name}" not found.')
 
@@ -206,11 +262,17 @@ class SecretManager:
         return True
     
     def set_current_vault(self, vault : str = '') -> bool:
+        '''
+        Sets the current vault for item operations.
+
+        Returns:
+            bool: True if successful.
+        '''
         if vault not in self._vaults:
             raise KeyError(f'Vault "{vault}" not found.')
         self._current_vault = vault
         return True
     
     def list_vaults(self) -> list[str]:
-        """Returns a list of all existing vault names."""
+        '''Returns a list of all existing vault names.'''
         return list(self._vaults.keys())
