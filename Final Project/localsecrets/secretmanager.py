@@ -45,7 +45,6 @@ class SecretManager:
     def item(self):
         return ItemController(self)
 
-    
     def _load_db_file(self):
         if not self._fileIO.file_exists():
             log(f'File {self._file_path} doesn’t exist. Initializing new database.', 'warn')
@@ -65,9 +64,49 @@ class SecretManager:
             self._load_data(parsed)
             return True
         except Exception as e:
-            log(f'Failed to load data: {e}', 'error')
-            return False
+            raise IOError(f'Failed to load data: {e}')
 
+    def export_no_encryption(self, file_path):
+        '''
+        Exports the current secret database to a file without encryption.
+
+        Temporarily disables encryption and saves the database to the specified path
+        in plain text format. After export, restores the original encryption settings 
+        and file path.
+
+        Returns:
+            bool: True if the export was successful, False otherwise.
+        '''
+        backup_enc_key = self._encription_key
+        backup_file_path = self._file_path
+        self._encription_key = None
+        self._file_path = file_path
+        self._fileIO = FileIO(file_path)
+        result = False
+        try:
+            if self.save_db_file():
+                result = True
+        except Exception as e:
+            log('e', 'warn')
+        finally:
+            self._encription_key = backup_enc_key
+            self._file_path = backup_file_path
+            self._fileIO = FileIO(self._file_path)
+        return result
+
+    def set_encryption_key(self, encryption_key):
+        '''
+        Sets the encryption key for the secret manager.
+
+        If a string is provided, encryption will be enabled using that key.
+        If None or any non-string value is provided, encryption is disabled.
+        '''
+        if isinstance(encryption_key, str):
+            self._encription_key = encryption_key
+            log(f'Encryption key set to {'*' * len(self._encription_key)}', 'info')
+        else:
+            self._encription_key = None
+            log(f'Encryption disabled.', 'info')
 
     def _load_data(self, data):
         self._version = data.get('version')

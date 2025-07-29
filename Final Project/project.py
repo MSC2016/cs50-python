@@ -1,36 +1,53 @@
 from localsecrets.secretmanager import SecretManager
+import sys
 import os
 
 def main():
-    path = "secrets.db"
-    sm = create_manager(path)
 
+    path = 'secrets.db'
+    sm = SecretManager(path, None)
+
+    if sm.export_no_encryption('/root/secrets_backup.json'):
+        print('saved to root dir')
+    else:
+        print('As expected, trying to save to the root dir, w/out root privileges didnt work.')
+
+    sm.save_db_file()   
+
+
+    sys.exit(0)
+
+
+    sm = create_manager(path)
     # Add secrets to two vaults
-    add_secret(sm, "work", "email", "work-email-pass")
-    add_secret(sm, "work", "slack", "slack-api-key")
-    add_secret(sm, "personal", "netflix", "netflix-password")
+    add_secret(sm, 'work', 'email', 'work-email-pass')
+    add_secret(sm, 'work', 'slack', 'slack-api-key')
+    add_secret(sm, 'personal', 'netflix', 'netflix-password')
+
+    sm.set_current_vault('personal')
+    print(sm.item('netflix').secret)
 
     # Move item from one vault to another
-    move_item(sm, "personal", "archived", "netflix")
+    move_item(sm, 'personal', 'archived', 'netflix')
 
     # Add and get user-defined metadata
-    sm.set_current_vault("work")
-    sm.item.set_user_data("email", "note", "Used for internal comms")
-    note = sm.item.get_user_data("email", "note")
-    print("Note on work email:", note)
+    sm.set_current_vault('work')
+    sm.item.set_user_data('email', 'note', 'Used for internal comms')
+    note = sm.item.get_user_data('email', 'note')
+    print('Note on work email:', note)
 
     # Search for all items containing a keyword
-    results = search_items(sm, "slack")
-    print("Search for 'slack':", [r["item_name"] for r in results])
+    results = search_items(sm, 'slack')
+    print(f'Search for "slack":', [result for result in results])
 
     # Delete and restore an item into a recovery vault
-    delete_and_restore(sm, "work", "slack", "recovery")
+    delete_and_restore(sm, 'work', 'slack', 'recovery')
 
     # Final state
-    print("Vaults:", sm.list_vaults())
-    print("Work vault items:", list_items_in_vault(sm, "work"))
-    print("Recovery vault items:", list_items_in_vault(sm, "recovery"))
-    print("Archived vault items:", list_items_in_vault(sm, "archived"))
+    print('Vaults:', sm.list_vaults())
+    print('Work vault items:', list_items_in_vault(sm, 'work'))
+    print('Recovery vault items:', list_items_in_vault(sm, 'recovery'))
+    print('Archived vault items:', list_items_in_vault(sm, 'archived'))
 
     sm.save_db_file()
 
@@ -56,7 +73,7 @@ def move_item(manager: SecretManager, vault_from: str, vault_to: str, item_name:
     deleted = manager.item.list_deleted()
     if not deleted:
         return False
-    uuid = deleted[0]["uuid"]
+    uuid = deleted[0]['uuid']
     manager.add_vault(vault_to)
     return manager.item.restore_deleted(uuid, vault_to)
 
@@ -66,7 +83,7 @@ def delete_and_restore(manager: SecretManager, vault: str, item_name: str, recov
     deleted = manager.item.list_deleted()
     if not deleted:
         return False
-    uuid = deleted[0]["uuid"]
+    uuid = deleted[0]['uuid']
     manager.add_vault(recovery_vault)
     return manager.item.restore_deleted(uuid, recovery_vault)
 
@@ -74,5 +91,5 @@ def search_items(manager: SecretManager, keyword: str) -> list[dict]:
     return manager.item.search(keyword)
 
 
-if __name__ == "__main__":
+if __name__ == '__main__':
     main()

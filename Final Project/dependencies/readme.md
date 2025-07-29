@@ -6,7 +6,7 @@ I selected **pwinput** because I want to have some visual feedback while typing 
 
 ## Why this isn’t in `requirements.txt`
 
-After installing pwinput via `pip`, I realized it lacked the ability to abort input with **Ctrl+C** (or **Ctrl+Z**). This is important to let users cancel password input gracefully.
+After installing pwinput via `pip`, I realized it lacked the ability to abort input with **Ctrl+C** (or **Ctrl+Z**). This is important to let users cancel password input.
 
 ## What I changed
 

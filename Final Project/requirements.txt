@@ -1,5 +1,5 @@
-pytest
-argparse
-filelock
-cryptography
-keyring
+cryptography==45.0.5
+filelock==3.18.0
+pynput==1.8.1
+pytest==8.4.1
+setuptools==80.9.0
