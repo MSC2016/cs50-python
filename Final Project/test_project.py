@@ -1,13 +1,6 @@
 import os
 import pytest
-from project import (
-    create_manager,
-    add_secret,
-    list_items_in_vault,
-    move_item,
-    delete_and_restore,
-    search_items,
-)
+from project import *
 
 TEST_DB_PATH = "test_secrets.db"
 

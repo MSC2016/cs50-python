@@ -56,6 +56,7 @@ class FileIO:
                         if os.path.exists(self._backup_path):
                             os.remove(self._backup_path)
                             log(f'Removed backup file {self._backup_path}', 'debug')
+                        self._delete_lock_file()
                         return True
 
                 log('Validation failed: written file does not match input', 'error')
@@ -82,3 +83,7 @@ class FileIO:
         if os.path.exists(self._backup_path):
             os.replace(self._backup_path, self._file_path)
             log(f'Restored {self._file_path} from {self._backup_path}', 'debug')
+
+    def _delete_lock_file(self):
+        if os.path.exists(self._lock_path):
+            os.remove(self._lock_path)

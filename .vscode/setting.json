@@ -1,5 +1,16 @@
 {
   "python.analysis.extraPaths": [
-    "./dependencies"
-  ]
+    "./",
+    "./dependencies",
+    "./Final Project/localsecrets"
+  ],
+  "python.defaultInterpreterPath": "/home/miguel/venvs/cs50-python-venv/bin/python",
+  "python.terminal.activateEnvironment": true,
+  "terminal.integrated.profiles.linux": {
+    "bash (venv)": {
+      "path": "/bin/bash",
+      "args": ["-c", "source /home/miguel/venvs/cs50-python-venv/bin/activate && exec bash"]
+    }
+  },
+  "terminal.integrated.defaultProfile.linux": "bash (venv)"
 }

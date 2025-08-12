@@ -142,7 +142,8 @@ class SecretManager:
             'deleted_items':self._deleted_items,
             }, indent=4).encode('utf-8')
         data = encrypt(json_data, self._encription_key) if self._encription_key is not None else json_data
-        return self._fileIO.save_data(data)
+        result = self._fileIO.save_data(data)
+        return result
     
     def _validate_data(self):
         problem = []
@@ -274,6 +275,24 @@ class SecretManager:
         del vault[item_name]
         return True
     
+    def move_item(self, item_name: str, origin_vault: str, dst_vault: str) -> bool:
+        '''
+        Moves an item from one vault to another.
+
+        Returns:
+            bool: True if the move was successful, False otherwise.
+        '''
+        if origin_vault not in self._vaults:
+            raise KeyError(f'Vault "{origin_vault}" not found.')
+        if dst_vault not in self._vaults:
+            raise KeyError(f'Vault "{dst_vault}" not found.')
+        if item_name not in self._vaults[origin_vault]:
+            raise KeyError(f'Item "{item_name}" not found in vault "{origin_vault}".')
+
+        item = self._vaults[origin_vault].pop(item_name)
+        self._vaults[dst_vault][item_name] = item
+        return item_name not in self._vaults[origin_vault] and item_name in self._vaults[dst_vault]
+        
     def delete_vault(self, vault_name: str, permanent: bool = False) -> bool:
         '''
         Delete a vault. If vault has items and soft delete is enabled,
