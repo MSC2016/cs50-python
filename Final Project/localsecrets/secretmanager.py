@@ -250,7 +250,7 @@ class SecretManager:
         '''
         return self.get_item(item_name, vault_name, True)
 
-    def delete_item(self, vault_name: str, item_name: str, permanent: bool = False) -> bool:
+    def delete_item(self, item_name: str, vault_name : str = '', permanent: bool = False) -> bool:
         '''
         Delete an item from a vault, if soft delete is enabled, and not explicitly permanent,
         move item to deleted_items instead of erasing it.
@@ -258,9 +258,11 @@ class SecretManager:
         Returns:
             bool: True if successfull.
         '''
+        
+        if not vault_name:
+            vault_name = self._current_vault
+        
         vault = self._vaults.get(vault_name)
-        if not vault:
-            raise KeyError(f'Vault "{vault_name}" not found.')
 
         item_data = vault[item_name]
 
@@ -314,7 +316,7 @@ class SecretManager:
         item_names = [k for k in vault]
 
         for name in item_names:
-            self.delete_item(vault_name, name, permanent=permanent)
+            self.delete_item(name, vault_name, permanent=permanent)
         del self._vaults[vault_name]
         log(f'Vault "{vault_name}" deleted.', 'info')
         return True

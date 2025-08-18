@@ -50,7 +50,7 @@ class ItemController:
         Returns:
             bool: True if the deletion was successful.
         '''
-        return self._manager.delete_item(self._manager._current_vault, item_name, permanent=permanent)
+        return self._manager.delete_item(item_name, self._manager._current_vault, permanent=permanent)
     
     def rename(self, item_name: str, new_name: str) -> bool:
         '''

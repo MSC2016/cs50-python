@@ -8,9 +8,9 @@ def main():
     sm = create_manager(path)
 
     if sm.export_no_encryption('/root/secrets_backup.json'):
-        print('saved to root dir')
+        print('Someting went wrong, saving to root dir returned true ???')
     else:
-        print('As expected, trying to save to the root dir, w/out root privileges didnt work.')
+        print('As expected, trying to save to the root dir, without root privileges didnt work.')
 
     # add an item and some user data to the default vault
     sm.add_item('test','my test api key')
@@ -57,7 +57,11 @@ def main():
     print('Recovery vault items:', list_items_in_vault(sm, 'recovery'))
     print('Archived vault items:', list_items_in_vault(sm, 'archived'))
 
+    sm.set_current_vault('default')
+    sm.add_item('test-delete','my test deleted api key')
+    sm.item.set_user_data('test-delete','User-data-test-key','user data test data')
 
+    sm.delete_item('test-delete')
     sm.save_db_file()
 
 def create_manager(path: str, encryption_key=None) -> SecretManager:

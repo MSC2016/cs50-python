@@ -10,14 +10,14 @@ def test_delete_item_permanent(test_db_path):
     sm = SecretManager(str(test_db_path), '')
     sm.add_vault('vault')
     sm.add_item('item1', 'secret1', 'vault')
-    assert sm.delete_item('vault', 'item1', permanent=True) is True
+    assert sm.delete_item('item1', 'vault', permanent=True) is True
     assert 'item1' not in sm._vaults['vault']
 
 def test_delete_item_soft(test_db_path):
     sm = SecretManager(str(test_db_path), '')
     sm.add_vault('vault')
     sm.add_item('item2', 'secret2', 'vault')
-    assert sm.delete_item('vault', 'item2', permanent=False) is True
+    assert sm.delete_item('item2', 'vault',permanent=False) is True
     assert 'item2' not in sm._vaults['vault']
     assert any(i["name"] == "item2" for i in sm._deleted_items.values())
 
@@ -43,7 +43,7 @@ def test_restore_soft_deleted_item(test_db_path):
     sm = SecretManager(str(test_db_path), '')
     sm.add_vault('vault')
     sm.add_item('item1', 'secret1', 'vault')
-    sm.delete_item('vault', 'item1', permanent=False)
+    sm.delete_item('item1', 'vault', permanent=False)
 
     deleted_items = sm.item.list_deleted()
     assert len(deleted_items) == 1
