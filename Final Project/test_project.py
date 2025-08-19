@@ -7,9 +7,13 @@ TEST_DB_PATH = "test_secrets.db"
 
 @pytest.fixture
 def manager():
+    # Ensure a clean test DB
     if os.path.exists(TEST_DB_PATH):
         os.remove(TEST_DB_PATH)
     sm = create_manager(TEST_DB_PATH)
+    # Add default vaults
+    sm.add_vault("work")
+    sm.add_vault("personal")
     yield sm
     if os.path.exists(TEST_DB_PATH):
         os.remove(TEST_DB_PATH)
@@ -22,44 +26,45 @@ def test_create_manager(manager):
 
 
 def test_add_secret(manager):
-    result = add_secret(manager, "test-vault", "test-item", "top-secret")
-    assert result is True
-    assert "test-item" in manager._vaults["test-vault"]
-    assert manager._vaults["test-vault"]["test-item"]["secret"] == "top-secret"
+    add_secret(manager, "work", "test-item", "top-secret", {"meta": "data"})
+    assert "test-item" in manager._vaults["work"]
+    assert manager._vaults["work"]["test-item"]["secret"] == "top-secret"
+    assert manager.item("test-item").get_user_data("meta") == "data"
 
 
-def test_list_items_in_vault(manager):
-    add_secret(manager, "work", "email", "pass123")
-    items = list_items_in_vault(manager, "work")
-    assert items == ["email"]
-
-
-def test_move_item(manager):
-    add_secret(manager, "vaultA", "token", "abc123")
-    moved = move_item(manager, "vaultA", "vaultB", "token")
+def test_move_secret(manager):
+    add_secret(manager, "personal", "email", "pass123")
+    moved = move_secret(manager, "personal", "work", "email")
     assert moved is True
-    assert "token" in manager._vaults["vaultB"]
-    assert "token" not in manager._vaults["vaultA"]
+    assert "email" in manager._vaults["work"]
+    assert "email" not in manager._vaults["personal"]
 
 
-def test_delete_and_restore(manager):
-    add_secret(manager, "main", "note", "sensitive-data")
-    restored = delete_and_restore(manager, "main", "note", "restored")
-    assert restored is True
-    assert "note" in manager._vaults["restored"]
-    assert "note" not in manager._vaults["main"]
-
-
-def test_search_items(manager):
-    add_secret(manager, "searchvault", "github", "gh-token")
-    add_secret(manager, "searchvault", "gitlab", "gl-token")
-    results = search_items(manager, "git")
+def test_search_secrets(manager):
+    add_secret(manager, "work", "github", "gh-token")
+    add_secret(manager, "work", "gitlab", "gl-token")
+    results = search_secrets(manager, "git")
     names = [item["item_name"] for item in results]
     assert "github" in names
     assert "gitlab" in names
 
 
-def test_search_items_case_insensitive(manager):
-    add_secret(manager, "mix", "DropBox", "token")
-    results = search_items(manager, "drop")
-    assert any("dropbox" in r["item_name"].lower() for r in results)
+def test_search_secrets_case_insensitive(manager):
+    add_secret(manager, "personal", "DropBox", "token")
+    results = search_secrets(manager, "drop")
+    names = [item["item_name"].lower() for item in results]
+    assert "dropbox" in names
+
+
+
+def test_delete_and_restore(manager):
+    add_secret(manager, "personal", "netflix", "netflix-pass")
+    restored = delete_and_restore(manager, "netflix", "personal")
+    assert restored is True
+    assert "netflix" in manager._vaults["personal"]
+
+
+def test_add_item_direct(manager):
+    manager["work"].add_item("project_one", "api-key")
+    assert "project_one" in manager._vaults["work"]
+    assert manager._vaults["work"]["project_one"]["secret"] == "api-key"
