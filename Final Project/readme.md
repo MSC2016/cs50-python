@@ -125,6 +125,5 @@ print(items)  # ['email', 'slack', ...]
 
 ## Final Thoughts / Todo List
 
-- When I started this project, my goal was to avoid hardcoding passwords. Currently, when instantiating the SecretManager, a password must be provided if the file is encrypted. If no password is entered, the file is encrypted with a key derived from an empty string — which is not very secure. My initial plan was to prompt the user for a password via the CLI, but that proved tedious during debugging. I explored ways to require the password only once per user session. I considered using keyring, but since I work across Windows native, WSL2, and Ubuntu, making it fully multiplatform was challenging. Keyring also appears to be deprecated and, based on my research, might not be the best solution. An alternative would be a resident app, but that would add too much complexity. It’s not perfect and not fully finished, but I plan to use it as-is for now, with the possibility of improvements in the future.
-
+- The goal of this project is to avoid hardcoding passwords. Currently, SecretManager requires a password to decrypt the file. If no password is entered, the file is encrypted with a key derived from an empty string, which is not secure. Prompting for a password via the CLI proved tedious during development. In the future, I plan to add support for storing the master password in the OS keyring, allowing it to be retrieved automatically across Windows, WSL, and Ubuntu. The implementation is still a work in progress, but it’s usable as-is with room for improvement.
 ---
